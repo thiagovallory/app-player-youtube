@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Player YouTube</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <section>
+        <label for="url">Link do YouTube (vídeo ou playlist)</label>
+        <div class="row">
+          <input id="url" type="text" list="history" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+          <datalist id="history"></datalist>
+          <button id="play-url" type="button">Tocar</button>
+        </div>
+        <p id="url-error" class="error" hidden></p>
+      </section>
+
+      <section>
+        <label for="display">Monitor de reprodução</label>
+        <div class="row">
+          <select id="display"></select>
+          <button id="identify" type="button">Identificar</button>
+        </div>
+        <p id="single-warning" class="warn" hidden>Só um monitor detectado — o player abrirá em janela comum.</p>
+      </section>
+
+      <section class="now">
+        <h1 id="title">Nada tocando</h1>
+        <p id="status" class="muted">Parado</p>
+        <p id="player-error" class="error" hidden></p>
+        <input id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="Posição" />
+        <div class="times"><span id="time">0:00</span><span id="duration">0:00</span></div>
+        <div class="row center">
+          <button id="prev" type="button" aria-label="Anterior">⏮</button>
+          <button id="toggle" type="button" aria-label="Tocar ou pausar">▶</button>
+          <button id="next" type="button" aria-label="Próximo">⏭</button>
+          <button id="stop" type="button" aria-label="Parar e fechar o player">Parar</button>
+        </div>
+        <label for="volume">Volume</label>
+        <input id="volume" type="range" min="0" max="100" step="1" value="100" />
+      </section>
+
+      <p id="notice" class="warn" hidden></p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

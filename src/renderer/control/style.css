@@ -1,0 +1,20 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #111; color: #eee; font: 14px/1.4 system-ui, sans-serif; }
+main { padding: 16px; display: grid; gap: 20px; }
+section { display: grid; gap: 8px; }
+label { font-weight: 600; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row.center { justify-content: center; }
+input[type='text'], select { flex: 1; min-width: 0; padding: 8px; background: #1e1e1e; color: inherit; border: 1px solid #444; border-radius: 6px; }
+input[type='range'] { width: 100%; }
+button { padding: 8px 14px; background: #2d6cdf; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font: inherit; }
+button:hover { background: #3b7af0; }
+#prev, #toggle, #next { font-size: 18px; min-width: 48px; }
+#stop, #identify { background: #3a3a3a; }
+.now h1 { margin: 0; font-size: 18px; overflow-wrap: anywhere; }
+.times { display: flex; justify-content: space-between; color: #aaa; font-variant-numeric: tabular-nums; }
+.muted { margin: 0; color: #aaa; }
+.error { margin: 0; color: #ff6b6b; }
+.warn { margin: 0; color: #f0c040; }
+[hidden] { display: none !important; }
