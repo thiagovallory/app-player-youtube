@@ -39,7 +39,9 @@ async function main(): Promise<void> {
     const { displays, selected } = resolveDisplays()
     return { display: selected, single: displays.length === 1 }
   }
-  const toControl = (channel: string, payload: unknown) => controlWin?.webContents.send(channel, payload)
+  const toControl = (channel: string, payload: unknown) => {
+    if (controlWin && !controlWin.isDestroyed()) controlWin.webContents.send(channel, payload)
+  }
 
   const controller = new PlayerController(baseUrl, () => toControl(STATE_TO_CONTROL, IDLE_STATE))
 
@@ -82,7 +84,10 @@ async function main(): Promise<void> {
   screen.on('display-metrics-changed', onDisplaysChanged)
 
   controlWin = createControlWindow(baseUrl)
-  controlWin.on('closed', () => app.quit())
+  controlWin.on('closed', () => {
+    controlWin = null
+    app.quit()
+  })
 }
 
 void main()
