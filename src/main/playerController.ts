@@ -6,7 +6,7 @@ import { createPlayerWindow } from './windows'
 
 export interface PlayerTarget {
   display: DisplayInfo
-  single: boolean
+  windowed: boolean
 }
 
 type Mode = 'screen' | 'window'
@@ -15,6 +15,7 @@ export class PlayerController {
   private win: BrowserWindow | null = null
   private mode: Mode = 'screen'
   private lastLoad: PlayerCommand | null = null
+  private lastVolume: PlayerCommand | null = null
   private readonly queue = new CommandQueue<PlayerCommand>((cmd) =>
     this.win?.webContents.send(CMD_TO_PLAYER, cmd),
   )
@@ -42,9 +43,13 @@ export class PlayerController {
       return
     }
     if (!this.win && cmd.type !== 'load') return
-    const replay = this.lastLoad
-    if (cmd.type === 'load') this.lastLoad = cmd
-    this.place(target, replay)
+    if (cmd.type === 'load') {
+      const replay = this.lastLoad
+      this.lastLoad = cmd
+      this.place(target, replay)
+    } else if (cmd.type === 'volume') {
+      this.lastVolume = cmd
+    }
     this.queue.push(cmd)
   }
 
@@ -56,15 +61,19 @@ export class PlayerController {
     if (!this.win) return
     this.destroy()
     this.lastLoad = null
+    this.lastVolume = null
     this.onClosed()
   }
 
   private place(target: PlayerTarget, replay: PlayerCommand | null): void {
-    const mode: Mode = target.single ? 'window' : 'screen'
+    const mode: Mode = target.windowed ? 'window' : 'screen'
     if (this.win && this.mode !== mode) this.destroy()
     if (!this.win) {
       this.open(target, mode)
-      if (replay) this.queue.push(replay)
+      if (replay) {
+        this.queue.push(replay)
+        if (this.lastVolume) this.queue.push(this.lastVolume)
+      }
     } else if (mode === 'screen') {
       const { x, y, width, height } = target.display
       this.win.setBounds({ x, y, width, height })
@@ -72,7 +81,7 @@ export class PlayerController {
   }
 
   private open(target: PlayerTarget, mode: Mode): void {
-    const win = createPlayerWindow(this.baseUrl, target.display, target.single)
+    const win = createPlayerWindow(this.baseUrl, target.display, target.windowed)
     this.win = win
     this.mode = mode
     this.queue.reset()
@@ -80,6 +89,7 @@ export class PlayerController {
       if (this.win !== win) return
       this.win = null
       this.lastLoad = null
+      this.lastVolume = null
       this.queue.reset()
       this.onClosed()
     })

@@ -38,6 +38,7 @@ let yt: YTPlayer | null = null
 let playerReady = false
 let backlog: PlayerCommand[] = []
 let state: PlayerState = { ...IDLE_STATE }
+let errorAt = 0
 
 function report(patch: Partial<PlayerState>): void {
   state = { ...state, ...patch }
@@ -65,23 +66,23 @@ function build(initial?: { videoId: string; listId: string }): void {
     events: {
       onReady: () => {
         playerReady = true
-        const pending = backlog
-        backlog = []
-        pending.forEach(exec)
+        while (playerReady && backlog.length) exec(backlog.shift()!)
         api.ready()
       },
       onStateChange: (event: { data: number }) => {
         const status = STATUS_BY_YT_STATE[event.data]
         if (!status || !yt) return
+        const keepError = !(status === 'playing' && Date.now() - errorAt > 4000)
         report({
           status,
           title: yt.getVideoData().title || state.title,
           duration: yt.getDuration(),
-          error: undefined,
+          ...(keepError ? {} : { error: undefined }),
         })
       },
       onError: (event: { data: number }) => {
         const info = describeYtError(event.data)
+        errorAt = Date.now()
         report({ status: 'error', error: info.message })
         const list = yt?.getPlaylist()
         if (info.skippable && list && list.length > 1) yt?.nextVideo()

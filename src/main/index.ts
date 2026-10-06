@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { app, ipcMain, screen, type BrowserWindow } from 'electron'
+import { app, dialog, ipcMain, screen, type BrowserWindow } from 'electron'
 import {
   CMD_FROM_CONTROL,
   DISPLAYS_CHANGED,
@@ -13,7 +13,7 @@ import {
   STATE_TO_CONTROL,
 } from '../shared/ipc'
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
-import { findSaved, pickDisplay, toDisplayInfos, toSavedDisplay } from './displays'
+import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
 import { PlayerController, type PlayerTarget } from './playerController'
 import { SettingsStore } from './settingsStore'
 import { startStaticServer } from './staticServer'
@@ -37,7 +37,11 @@ async function main(): Promise<void> {
   }
   const target = (): PlayerTarget => {
     const { displays, selected } = resolveDisplays()
-    return { display: selected, single: displays.length === 1 }
+    const controlDisplayId =
+      controlWin && !controlWin.isDestroyed()
+        ? screen.getDisplayMatching(controlWin.getBounds()).id
+        : undefined
+    return { display: selected, windowed: shouldWindow(displays, selected, controlDisplayId) }
   }
   const toControl = (channel: string, payload: unknown) => {
     if (controlWin && !controlWin.isDestroyed()) controlWin.webContents.send(channel, payload)
@@ -90,4 +94,7 @@ async function main(): Promise<void> {
   })
 }
 
-void main()
+main().catch((err) => {
+  dialog.showErrorBox('Erro ao iniciar', String(err))
+  app.quit()
+})

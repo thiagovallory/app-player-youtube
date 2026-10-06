@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { DisplayInfo } from '../shared/types'
-import { findSaved, pickDisplay, toDisplayInfos, toSavedDisplay } from './displays'
+import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
 
 const d = (id: number, x: number, isPrimary = false): DisplayInfo => ({
   id,
@@ -62,4 +62,14 @@ describe('findSaved', () => {
   it('returns undefined when nothing is saved', () => {
     expect(findSaved(undefined, [d(1, 0, true)])).toBeUndefined()
   })
+})
+
+describe('shouldWindow', () => {
+  const a = d(1, 0, true)
+  const b = d(2, 1920)
+  it('windows when only one display', () => expect(shouldWindow([a], a, 1)).toBe(true))
+  it('windows when selected display holds the control window', () =>
+    expect(shouldWindow([a, b], a, 1)).toBe(true))
+  it('fullscreens on a different display', () => expect(shouldWindow([a, b], b, 1)).toBe(false))
+  it('fullscreens when control display unknown', () => expect(shouldWindow([a, b], b, undefined)).toBe(false))
 })

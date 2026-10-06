@@ -40,6 +40,14 @@ export function pickDisplay(saved: SavedDisplay | undefined, displays: DisplayIn
   )
 }
 
+export function shouldWindow(
+  displays: DisplayInfo[],
+  selected: DisplayInfo,
+  controlDisplayId: number | undefined,
+): boolean {
+  return displays.length === 1 || (controlDisplayId !== undefined && controlDisplayId === selected.id)
+}
+
 export function toSavedDisplay(d: DisplayInfo): SavedDisplay {
   return { id: d.id, x: d.x, y: d.y, width: d.width, height: d.height }
 }
