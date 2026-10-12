@@ -13,7 +13,7 @@ npm test           # testes unitários
 
 ## Uso
 
-1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Se a fila estava vazia, começa a tocar. **Tocar agora** substitui a fila inteira pelo link.
+1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Se a fila estava vazia, começa a tocar. **Tocar agora** substitui a fila inteira pelo link. Se o vídeo já estiver na fila, o app pede confirmação antes de adicionar de novo.
 2. Playlists entram com todos os vídeos (até 200); os títulos aparecem aos poucos.
 3. Na fila: arraste para reordenar, ✕ remove, clique no título para tocar aquele item, **Limpar** esvazia.
 4. Escolha o monitor em "Monitor de reprodução" (**Identificar** mostra o número em cada tela).

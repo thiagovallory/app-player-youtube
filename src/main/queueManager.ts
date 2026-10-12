@@ -9,6 +9,7 @@ export interface QueueManagerDeps {
   playVideo(videoId: string): void
   stopPlayer(): void
   addHistory(url: string): void
+  confirmDuplicates(info: { duplicates: number; total: number }): Promise<boolean>
   saved: {
     list(): SavedQueue[]
     save(name: string, items: QueueVideo[]): boolean
@@ -162,6 +163,12 @@ export class QueueManager {
       }
       videos = ids.map((videoId) => ({ videoId, title: videoId }))
       if (target.type === 'video') startVideoId = target.id
+    }
+
+    if (!playNow) {
+      const present = new Set(this.queue.snapshot().items.map((i) => i.videoId))
+      const duplicates = videos.filter((v) => present.has(v.videoId)).length
+      if (duplicates > 0 && !(await this.deps.confirmDuplicates({ duplicates, total: videos.length }))) return
     }
 
     this.apply(playNow ? this.queue.replace(videos, startVideoId) : this.queue.add(videos))

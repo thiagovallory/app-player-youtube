@@ -74,6 +74,21 @@ async function main(): Promise<void> {
     },
     stopPlayer: () => controller.close(),
     addHistory: (url) => store.addHistory(url),
+    confirmDuplicates: async ({ duplicates, total }) => {
+      const options = {
+        type: 'question' as const,
+        buttons: ['Adicionar mesmo assim', 'Cancelar'],
+        defaultId: 1,
+        cancelId: 1,
+        message: total === 1 ? 'Este vídeo já está na fila.' : `${duplicates} de ${total} vídeos já estão na fila.`,
+        detail: 'Adicionar mesmo assim?',
+      }
+      const { response } =
+        controlWin && !controlWin.isDestroyed()
+          ? await dialog.showMessageBox(controlWin, options)
+          : await dialog.showMessageBox(options)
+      return response === 0
+    },
     saved: {
       list: () => store.get().queues,
       save: (name, items) => store.saveQueue(name, items),

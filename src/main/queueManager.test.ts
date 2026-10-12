@@ -19,6 +19,8 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
   const published: QueueState[] = []
   const notices: string[] = []
   const history: string[] = []
+  const confirms: { duplicates: number; total: number }[] = []
+  const answer = { value: true }
   const titles: Record<string, string> = {}
   const deps: QueueManagerDeps = {
     expandPlaylist: async () => [V1, V2, V3],
@@ -48,6 +50,10 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
         if (index >= 0) saved.splice(index, 1)
       },
     },
+    confirmDuplicates: async (info) => {
+      confirms.push(info)
+      return answer.value
+    },
     publish: (state) => {
       published.push(state)
     },
@@ -58,7 +64,7 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
     ...overrides,
   }
   const manager = new QueueManager(deps, new PlaybackQueue(() => `u${++n}`))
-  return { manager, player, played, published, notices, history, titles, saved, stops: () => stops }
+  return { manager, player, played, published, notices, history, titles, saved, confirms, answer, stops: () => stops }
 }
 
 const ids = (m: QueueManager) => m.state().items.map((i) => i.videoId)
@@ -187,6 +193,80 @@ describe('QueueManager.add', () => {
     release([V1, V2])
     await Promise.all([first, second])
     expect(ids(t.manager)).toEqual([V1, V2, V3])
+  })
+})
+
+describe('QueueManager duplicate confirmation', () => {
+  it('asks before adding a video already in the queue', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V1), false)
+    expect(t.confirms).toEqual([{ duplicates: 1, total: 1 }])
+    expect(ids(t.manager)).toEqual([V1, V1])
+  })
+
+  it('adds nothing when the user declines', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    t.answer.value = false
+    await t.manager.add(url(V1), false)
+    expect(ids(t.manager)).toEqual([V1])
+    expect(t.played).toEqual([V1])
+  })
+
+  it('does not fetch titles when declined', async () => {
+    let fetched = 0
+    const t = setup({
+      fetchTitles: async () => {
+        fetched++
+      },
+    })
+    await t.manager.add(url(V1), false)
+    t.answer.value = false
+    await t.manager.add(url(V1), false)
+    await t.manager.settled()
+    expect(fetched).toBe(1)
+  })
+
+  it('asks once for a playlist, counting the duplicates', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(`${url(V2)}`, false)
+    await t.manager.add(playlistUrl, false)
+    expect(t.confirms).toEqual([{ duplicates: 2, total: 3 }])
+    expect(ids(t.manager)).toEqual([V1, V2, V1, V2, V3])
+  })
+
+  it('never asks for play now', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V1), true)
+    expect(t.confirms).toEqual([])
+  })
+
+  it('never asks without duplicates', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V2), false)
+    expect(t.confirms).toEqual([])
+  })
+
+  it('keeps request order while a confirmation is pending', async () => {
+    let release!: (ok: boolean) => void
+    const t = setup({
+      confirmDuplicates: () =>
+        new Promise<boolean>((resolve) => {
+          release = resolve
+        }),
+    })
+    await t.manager.add(url(V1), false)
+    const dup = t.manager.add(url(V1), false)
+    const other = t.manager.add(url(V2), false)
+    await flush()
+    expect(ids(t.manager)).toEqual([V1])
+    release(true)
+    await Promise.all([dup, other])
+    expect(ids(t.manager)).toEqual([V1, V1, V2])
   })
 })
 
