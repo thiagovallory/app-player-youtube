@@ -1,4 +1,4 @@
-import type { DisplaysSnapshot, PlayerCommand, PlayerState, ProbeResult, Settings } from './types'
+import type { DisplaysSnapshot, PlayerCommand, PlayerState, ProbeResult, QueueState, Settings } from './types'
 
 export type Unsubscribe = () => void
 
@@ -8,7 +8,17 @@ export interface ControlApi {
   identifyDisplays(): Promise<void>
   getSettings(): Promise<Settings>
   sendCommand(cmd: PlayerCommand): void
+  queueGet(): Promise<QueueState | null>
+  queueAdd(url: string, playNow: boolean): void
+  queueRemove(uid: string): void
+  queueMove(uid: string, toIndex: number): void
+  queueClear(): void
+  queuePlayAt(uid: string): void
+  queueSave(name: string): void
+  queueLoadSaved(name: string): void
+  queueDeleteSaved(name: string): void
   onState(cb: (state: PlayerState) => void): Unsubscribe
+  onQueueState(cb: (state: QueueState) => void): Unsubscribe
   onDisplaysChanged(cb: (snapshot: DisplaysSnapshot) => void): Unsubscribe
   onNotice(cb: (message: string) => void): Unsubscribe
 }

@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { app, dialog, ipcMain, screen, type BrowserWindow } from 'electron'
+import { app, dialog, ipcMain, net, screen, type BrowserWindow, type WebContents } from 'electron'
 import {
   CMD_FROM_CONTROL,
   DISPLAYS_CHANGED,
@@ -8,13 +8,27 @@ import {
   DISPLAYS_SELECT,
   NOTICE,
   PLAYER_READY,
+  QUEUE_ADD,
+  QUEUE_CLEAR,
+  QUEUE_DELETE_SAVED,
+  QUEUE_GET,
+  QUEUE_LOAD_SAVED,
+  QUEUE_MOVE,
+  QUEUE_PLAY_AT,
+  QUEUE_REMOVE,
+  QUEUE_SAVE,
+  QUEUE_STATE,
   SETTINGS_GET,
   STATE_FROM_PLAYER,
   STATE_TO_CONTROL,
 } from '../shared/ipc'
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
+import { isMoveIndex, isUid, isUrlText, parseQueueName } from '../shared/validate'
 import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
+import { fetchTitles } from './oembed'
 import { PlayerController, type PlayerTarget } from './playerController'
+import { expandPlaylist } from './playlistExpander'
+import { QueueManager } from './queueManager'
 import { SettingsStore } from './settingsStore'
 import { startStaticServer } from './staticServer'
 import { createControlWindow, identifyDisplays } from './windows'
@@ -46,8 +60,28 @@ async function main(): Promise<void> {
   const toControl = (channel: string, payload: unknown) => {
     if (controlWin && !controlWin.isDestroyed()) controlWin.webContents.send(channel, payload)
   }
+  const isControl = (sender: WebContents) =>
+    controlWin !== null && !controlWin.isDestroyed() && sender === controlWin.webContents
 
   const controller = new PlayerController(baseUrl, () => toControl(STATE_TO_CONTROL, IDLE_STATE))
+
+  const manager = new QueueManager({
+    expandPlaylist: (listId) => expandPlaylist(baseUrl, listId),
+    fetchTitles: (ids, onTitle) => fetchTitles(ids, onTitle, (url, init) => net.fetch(url, init)),
+    playVideo: (videoId) => {
+      controller.send({ type: 'play-video', videoId }, target())
+      controller.send({ type: 'volume', value: store.get().volume }, target())
+    },
+    stopPlayer: () => controller.close(),
+    addHistory: (url) => store.addHistory(url),
+    saved: {
+      list: () => store.get().queues,
+      save: (name, items) => store.saveQueue(name, items),
+      delete: (name) => store.deleteQueue(name),
+    },
+    publish: (state) => toControl(QUEUE_STATE, state),
+    notify: (message) => toControl(NOTICE, message),
+  })
 
   ipcMain.handle(DISPLAYS_LIST, () => snapshot())
   ipcMain.handle(DISPLAYS_SELECT, (_event, id: number) => {
@@ -61,18 +95,69 @@ async function main(): Promise<void> {
   ipcMain.handle(DISPLAYS_IDENTIFY, () => identifyDisplays(baseUrl, resolveDisplays().displays))
   ipcMain.handle(SETTINGS_GET, () => store.get())
 
+  ipcMain.handle(QUEUE_GET, (event) => (isControl(event.sender) ? manager.state() : null))
+  ipcMain.on(QUEUE_ADD, (event, payload: unknown) => {
+    const { url, playNow } = (payload ?? {}) as { url?: unknown; playNow?: unknown }
+    if (!isControl(event.sender) || !isUrlText(url)) return
+    manager.add(url, playNow === true).catch((err) => toControl(NOTICE, String(err)))
+  })
+  ipcMain.on(QUEUE_REMOVE, (event, uid: unknown) => {
+    if (isControl(event.sender) && isUid(uid)) manager.remove(uid)
+  })
+  ipcMain.on(QUEUE_MOVE, (event, payload: unknown) => {
+    const { uid, toIndex } = (payload ?? {}) as { uid?: unknown; toIndex?: unknown }
+    if (isControl(event.sender) && isUid(uid) && isMoveIndex(toIndex, manager.state().items.length)) {
+      manager.move(uid, toIndex)
+    }
+  })
+  ipcMain.on(QUEUE_CLEAR, (event) => {
+    if (isControl(event.sender)) manager.clear()
+  })
+  ipcMain.on(QUEUE_PLAY_AT, (event, uid: unknown) => {
+    if (isControl(event.sender) && isUid(uid)) manager.playAt(uid)
+  })
+  ipcMain.on(QUEUE_SAVE, (event, name: unknown) => {
+    if (!isControl(event.sender)) return
+    const clean = parseQueueName(name)
+    if (clean) manager.save(clean)
+    else toControl(NOTICE, 'Nome de fila inválido (use de 1 a 100 caracteres).')
+  })
+  ipcMain.on(QUEUE_LOAD_SAVED, (event, name: unknown) => {
+    const clean = parseQueueName(name)
+    if (isControl(event.sender) && clean) manager.loadSaved(clean)
+  })
+  ipcMain.on(QUEUE_DELETE_SAVED, (event, name: unknown) => {
+    const clean = parseQueueName(name)
+    if (isControl(event.sender) && clean) manager.deleteSaved(clean)
+  })
+
   ipcMain.on(CMD_FROM_CONTROL, (event, cmd: PlayerCommand) => {
-    if (event.sender !== controlWin?.webContents) return
-    if (cmd.type === 'volume') store.setVolume(cmd.value)
-    if (cmd.type === 'load') store.addHistory(cmd.url)
+    if (!isControl(event.sender)) return
+    switch (cmd.type) {
+      case 'next':
+        manager.next()
+        return
+      case 'prev':
+        manager.prev()
+        return
+      case 'play-video':
+        return
+      case 'volume':
+        store.setVolume(cmd.value)
+        break
+      case 'seek':
+        if (!Number.isFinite(cmd.seconds)) return
+        break
+    }
     controller.send(cmd, target())
-    if (cmd.type === 'load') controller.send({ type: 'volume', value: store.get().volume }, target())
   })
   ipcMain.on(PLAYER_READY, (event) => {
     if (controller.owns(event.sender)) controller.markReady()
   })
   ipcMain.on(STATE_FROM_PLAYER, (event, state: PlayerState) => {
-    if (controller.owns(event.sender)) toControl(STATE_TO_CONTROL, state)
+    if (!controller.owns(event.sender)) return
+    toControl(STATE_TO_CONTROL, state)
+    manager.onPlayerState(state)
   })
 
   const onDisplaysChanged = () => {

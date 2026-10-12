@@ -45,10 +45,9 @@ export async function initPlayback(): Promise<void> {
   let seeking = false
   let status: PlayerState['status'] = 'idle'
 
-  const playFromUrl = () => {
+  const submit = (playNow: boolean) => {
     notice.hidden = true
-    const target = parseYoutubeUrl(url.value)
-    if (!target) {
+    if (!parseYoutubeUrl(url.value)) {
       urlError.textContent = 'Link inválido. Cole um link de vídeo ou playlist do YouTube.'
       urlError.hidden = false
       return
@@ -56,12 +55,14 @@ export async function initPlayback(): Promise<void> {
     urlError.hidden = true
     const value = url.value.trim()
     addHistoryOption(value)
-    window.control.sendCommand({ type: 'load', target, url: value })
+    window.control.queueAdd(value, playNow)
+    url.value = ''
   }
 
-  byId('play-url').addEventListener('click', playFromUrl)
+  byId('add-url').addEventListener('click', () => submit(false))
+  byId('play-now').addEventListener('click', () => submit(true))
   url.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') playFromUrl()
+    if (e.key === 'Enter') submit(false)
   })
   toggle.addEventListener('click', () =>
     window.control.sendCommand({ type: status === 'playing' ? 'pause' : 'play' }),

@@ -3,7 +3,6 @@ export type YoutubeTarget =
   | { type: 'playlist'; listId: string }
 
 export type PlayerCommand =
-  | { type: 'load'; target: YoutubeTarget; url: string }
   | { type: 'play-video'; videoId: string }
   | { type: 'play' }
   | { type: 'pause' }
