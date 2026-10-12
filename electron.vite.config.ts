@@ -36,6 +36,7 @@ export default defineConfig({
         input: {
           control: resolve('src/preload/control.ts'),
           player: resolve('src/preload/player.ts'),
+          probe: resolve('src/preload/probe.ts'),
         },
       },
     },
@@ -48,6 +49,7 @@ export default defineConfig({
           control: resolve('src/renderer/control/index.html'),
           player: resolve('src/renderer/player/index.html'),
           identify: resolve('src/renderer/identify/index.html'),
+          probe: resolve('src/renderer/probe/index.html'),
         },
       },
     },

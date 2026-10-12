@@ -114,3 +114,15 @@ export function identifyDisplays(
     }, 2500);
   });
 }
+
+export function createProbeWindow(baseUrl: string, listId: string): BrowserWindow {
+  const win = new BrowserWindow({
+    show: false,
+    width: 480,
+    height: 270,
+    webPreferences: { ...webPreferences("probe"), backgroundThrottling: false },
+  });
+  lockDown(win);
+  void win.loadURL(`${baseUrl}/probe/index.html#${listId}`);
+  return win;
+}
