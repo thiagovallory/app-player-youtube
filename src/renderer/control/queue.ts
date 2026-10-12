@@ -27,7 +27,9 @@ export async function initQueue(): Promise<void> {
   const row = (item: QueueItem, position: number): HTMLLIElement => {
     const li = document.createElement('li')
     li.draggable = true
-    li.classList.toggle('current', item.uid === state.currentUid)
+    const isCurrent = item.uid === state.currentUid
+    li.classList.toggle('current', isCurrent)
+    if (isCurrent) li.setAttribute('aria-current', 'true')
 
     const handle = document.createElement('span')
     handle.className = 'handle'

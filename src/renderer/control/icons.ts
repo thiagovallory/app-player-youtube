@@ -1,7 +1,6 @@
 // Ícones inline (estilo traço, currentColor). Constantes estáticas: nunca interpolar dados externos.
 const ICONS = {
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
   play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor"/>',
   pause: '<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>',
   'skip-prev': '<path d="M18 5v14L8 12z" fill="currentColor"/><path d="M6 5v14"/>',
@@ -14,12 +13,11 @@ const ICONS = {
   replace: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
   'list-plus': '<path d="M4 6h11M4 12h11M4 18h7M18 14v6M15 17h6"/>',
   bars: '<path d="M6 20V10M12 20V4M18 20v-8"/>',
-  chevron: '<path d="m9 6 6 6-6 6"/>',
 } as const
 
 export type IconName = keyof typeof ICONS
 
-export const ICON_SVG: Record<IconName, string> = Object.fromEntries(
+const ICON_SVG: Record<IconName, string> = Object.fromEntries(
   (Object.keys(ICONS) as IconName[]).map((name) => [
     name,
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[name]}</svg>`,
@@ -36,6 +34,7 @@ export function icon(name: IconName): SVGSVGElement {
 // Substitui <span data-icon="nome"> estáticos do HTML pelo SVG correspondente.
 export function hydrateIcons(root: ParentNode = document): void {
   root.querySelectorAll<HTMLElement>('[data-icon]').forEach((el) => {
-    el.replaceChildren(icon(el.dataset.icon as IconName))
+    const name = el.dataset.icon
+    if (name && name in ICONS) el.replaceChildren(icon(name as IconName))
   })
 }

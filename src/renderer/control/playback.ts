@@ -98,6 +98,7 @@ export async function initPlayback(): Promise<void> {
   window.control.onState((s) => {
     status = s.status
     title.textContent = s.title || 'Nada tocando'
+    title.title = title.textContent
     statusEl.textContent = STATUS_TEXT[s.status]
     playerError.textContent = s.error ?? ''
     playerError.hidden = !s.error
