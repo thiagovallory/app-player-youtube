@@ -4,7 +4,10 @@ export function initMenu(): void {
   const toggle = document.getElementById('menu-toggle') as HTMLButtonElement
   const panel = document.getElementById('menu-panel') as HTMLElement
 
+  const topRow = document.getElementById('top-row') as HTMLElement
+
   const setOpen = (open: boolean) => {
+    if (open) panel.style.setProperty('--menu-top', `${Math.ceil(topRow.getBoundingClientRect().bottom) + 8}px`)
     panel.hidden = !open
     toggle.setAttribute('aria-expanded', String(open))
   }

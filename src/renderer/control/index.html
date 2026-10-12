@@ -9,34 +9,34 @@
   <body>
     <main>
       <header class="top">
-        <div class="row wrap">
-          <button id="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu-panel">☰</button>
+        <div id="top-row" class="top-row">
+          <button id="menu-toggle" class="icon-btn" type="button" aria-label="Menu" title="Menu" aria-expanded="false" aria-controls="menu-panel"><span data-icon="menu"></span></button>
           <input id="url" type="text" list="history" aria-label="Link do YouTube (vídeo ou playlist)" placeholder="Link do YouTube (vídeo ou playlist)" autocomplete="off" />
           <datalist id="history"></datalist>
-          <button id="add-url" type="button">Adicionar à fila</button>
-          <button id="play-now" type="button">Tocar agora</button>
+          <button id="add-url" class="btn primary" type="button" aria-label="Adicionar à fila" title="Adicionar à fila">Adicionar</button>
+          <button id="play-now" class="btn" type="button" title="Tocar agora">Tocar agora</button>
         </div>
         <p id="url-error" class="error" hidden></p>
 
         <div id="menu-panel" class="menu" role="dialog" aria-label="Menu" hidden>
-          <section>
-            <label for="display">Monitor de reprodução</label>
+          <section class="menu-block">
+            <label for="display" class="label">Monitor de reprodução</label>
+            <select id="display"></select>
             <div class="row">
-              <select id="display"></select>
-              <button id="identify" type="button">Identificar</button>
+              <button id="identify" class="btn" type="button">Identificar</button>
             </div>
             <p id="single-warning" class="warn" hidden>Só um monitor detectado — o player abrirá em janela comum.</p>
           </section>
 
-          <section>
-            <label for="queue-name">Salvar fila</label>
+          <section class="menu-block">
+            <label for="queue-name" class="label">Salvar fila</label>
             <div class="row">
               <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />
-              <button id="queue-save" type="button">Salvar</button>
+              <button id="queue-save" class="btn primary" type="button">Salvar</button>
             </div>
           </section>
 
-          <section>
+          <section class="menu-block">
             <span class="label">Filas salvas</span>
             <p id="saved-empty" class="muted">Nenhuma fila salva.</p>
             <ul id="saved-list" aria-label="Filas salvas"></ul>
@@ -45,31 +45,38 @@
       </header>
 
       <section class="now">
-        <h1 id="title">Nada tocando</h1>
-        <p id="status" class="muted">Parado</p>
+        <div class="now-head">
+          <h1 id="title">Nada tocando</h1>
+          <p id="status" class="chip">Parado</p>
+        </div>
         <p id="player-error" class="error" hidden></p>
-        <input id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="Posição" />
-        <div class="times"><span id="time">0:00</span><span id="duration">0:00</span></div>
-        <div class="row controls">
-          <button id="prev" type="button" aria-label="Anterior">⏮</button>
-          <button id="toggle" type="button" aria-label="Tocar ou pausar">▶</button>
-          <button id="next" type="button" aria-label="Próximo">⏭</button>
-          <button id="stop" type="button" aria-label="Parar e fechar o player">Parar</button>
-          <input id="volume" type="range" min="0" max="100" step="1" value="100" aria-label="Volume" />
+        <div class="seek-row">
+          <span id="time" class="time">0:00</span>
+          <input id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="Posição" />
+          <span id="duration" class="time">0:00</span>
+        </div>
+        <div class="controls">
+          <button id="prev" class="icon-btn" type="button" aria-label="Anterior" title="Anterior"><span data-icon="skip-prev"></span></button>
+          <button id="toggle" class="icon-btn round" type="button" aria-label="Tocar" title="Tocar"><span data-icon="play"></span></button>
+          <button id="next" class="icon-btn" type="button" aria-label="Próximo" title="Próximo"><span data-icon="skip-next"></span></button>
+        </div>
+        <div class="secondary">
+          <button id="stop" class="btn ghost" type="button" aria-label="Parar e fechar o player" title="Parar e fechar o player"><span data-icon="stop"></span>Parar</button>
+          <span class="vol"><span class="vol-icon" data-icon="volume"></span><input id="volume" type="range" min="0" max="100" step="1" value="100" aria-label="Volume" /></span>
         </div>
       </section>
 
       <section class="queue">
-        <div class="row space">
-          <span class="label">Fila de reprodução</span>
-          <button id="queue-clear" type="button">Limpar</button>
+        <div class="queue-head">
+          <span id="queue-count" class="label">Fila</span>
+          <button id="queue-clear" class="btn ghost" type="button">Limpar</button>
         </div>
         <p id="queue-status" class="muted" hidden>Carregando playlist…</p>
-        <p id="queue-empty" class="muted">A fila está vazia. Adicione um link acima.</p>
+        <p id="queue-empty" class="empty">A fila está vazia. Cole um link acima e toque em Adicionar.</p>
         <ul id="queue" aria-label="Fila de reprodução"></ul>
       </section>
 
-      <p id="notice" class="warn" hidden></p>
+      <p id="notice" class="notice" role="status" hidden></p>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

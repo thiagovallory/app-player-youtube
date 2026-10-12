@@ -32,3 +32,10 @@ export function icon(name: IconName): SVGSVGElement {
   svg.classList.add('icon')
   return svg
 }
+
+// Substitui <span data-icon="nome"> estáticos do HTML pelo SVG correspondente.
+export function hydrateIcons(root: ParentNode = document): void {
+  root.querySelectorAll<HTMLElement>('[data-icon]').forEach((el) => {
+    el.replaceChildren(icon(el.dataset.icon as IconName))
+  })
+}
