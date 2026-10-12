@@ -13,9 +13,12 @@ npm test           # testes unitários
 
 ## Uso
 
-1. Cole o link de um vídeo ou playlist e clique em **Tocar**.
-2. Escolha o monitor em "Monitor de reprodução" (use **Identificar** para ver o número em cada tela).
-3. Use play/pause, anterior/próximo, seek e volume. **Parar** fecha o player.
+1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Se a fila estava vazia, começa a tocar. **Tocar agora** substitui a fila inteira pelo link.
+2. Playlists entram com todos os vídeos (até 200); os títulos aparecem aos poucos.
+3. Na fila: arraste para reordenar, ✕ remove, clique no título para tocar aquele item, **Limpar** esvazia.
+4. Escolha o monitor em "Monitor de reprodução" (**Identificar** mostra o número em cada tela).
+5. Use play/pause, anterior/próximo, seek e volume. **Parar** fecha o player e mantém a fila.
+6. **Salvar fila** guarda a fila atual com um nome; em "Filas salvas", **Carregar** substitui a fila atual e **Excluir** apaga a salva. A fila ativa não é restaurada ao abrir o app.
 
 ## Limitações
 
