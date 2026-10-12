@@ -19,10 +19,14 @@ export class PlaybackQueue {
     const created = this.make(videos)
     const startFresh = this.items.length === 0 || this.atEnd || this.currentUid === null
     this.items.push(...created)
-    return startFresh ? this.play(created[0]) : null
+    if (startFresh) {
+      this.currentUid = created[0].uid
+      this.atEnd = false
+    }
+    return null
   }
 
-  replace(videos: QueueVideo[], startVideoId?: string): QueueAction {
+  replace(videos: QueueVideo[], startVideoId?: string, autoplay = true): QueueAction {
     this.items = this.make(videos)
     this.atEnd = false
     if (this.items.length === 0) {
@@ -30,7 +34,9 @@ export class PlaybackQueue {
       return { stop: true }
     }
     const start = (startVideoId && this.items.find((i) => i.videoId === startVideoId)) || this.items[0]
-    return this.play(start)
+    if (autoplay) return this.play(start)
+    this.currentUid = start.uid
+    return { stop: true }
   }
 
   remove(uid: string): QueueAction {

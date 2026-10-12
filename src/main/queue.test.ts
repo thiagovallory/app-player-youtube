@@ -11,24 +11,24 @@ function make() {
 const ids = (q: PlaybackQueue) => q.snapshot().items.map((i) => i.videoId)
 
 describe('add', () => {
-  it('starts the first added item when nothing is current (after removing the last current item)', () => {
+  it('selects the first added item without playing when nothing is current (after removing the last current item)', () => {
     const q = make()
     q.add([v('a'), v('b')])
     q.next()
     q.remove('u2')
     expect(q.snapshot().currentUid).toBeNull()
-    expect(q.add([v('c')])).toEqual({ play: { uid: 'u3', videoId: 'c', title: 'c' } })
+    expect(q.add([v('c')])).toBeNull()
+    expect(q.snapshot().currentUid).toBe('u3')
   })
 
-  it('plays the first added item when the queue was empty', () => {
+  it('selects the first added item without playing when the queue was empty', () => {
     const q = make()
-    const action = q.add([v('a'), v('b')])
-    expect(action).toEqual({ play: { uid: 'u1', videoId: 'a', title: 'a' } })
+    expect(q.add([v('a'), v('b')])).toBeNull()
     expect(ids(q)).toEqual(['a', 'b'])
     expect(q.snapshot().currentUid).toBe('u1')
   })
 
-  it('appends without playing when something is already queued', () => {
+  it('appends without changing the current item when something is already queued', () => {
     const q = make()
     q.add([v('a')])
     expect(q.add([v('b')])).toBeNull()
@@ -36,11 +36,14 @@ describe('add', () => {
     expect(q.snapshot().currentUid).toBe('u1')
   })
 
-  it('plays the first new item after the queue ended automatically', () => {
+  it('selects the first new item without playing after the queue ended automatically', () => {
     const q = make()
     q.add([v('a')])
     expect(q.next(true)).toBeNull()
-    expect(q.add([v('b')])).toEqual({ play: { uid: 'u2', videoId: 'b', title: 'b' } })
+    expect(q.add([v('b')])).toBeNull()
+    expect(q.snapshot().currentUid).toBe('u2')
+    expect(q.next()).toBeNull()
+    expect(q.add([v('c')])).toBeNull()
     expect(q.snapshot().currentUid).toBe('u2')
   })
 
@@ -76,6 +79,31 @@ describe('replace', () => {
     const q = make()
     q.add([v('a')])
     expect(q.replace([])).toEqual({ stop: true })
+    expect(q.snapshot()).toEqual({ items: [], currentUid: null })
+  })
+
+  it('without autoplay selects the first item and asks to stop', () => {
+    const q = make()
+    q.add([v('x')])
+    expect(q.replace([v('a'), v('b')], undefined, false)).toEqual({ stop: true })
+    expect(ids(q)).toEqual(['a', 'b'])
+    expect(q.snapshot().currentUid).toBe('u2')
+  })
+
+  it('without autoplay selects the requested video when present', () => {
+    const q = make()
+    expect(q.replace([v('a'), v('b')], 'b', false)).toEqual({ stop: true })
+    expect(q.snapshot().currentUid).toBe('u2')
+  })
+
+  it('without autoplay clears the ended flag and stops for an empty list', () => {
+    const q = make()
+    q.add([v('a')])
+    q.next(true)
+    q.replace([v('b')], undefined, false)
+    expect(q.add([v('c')])).toBeNull()
+    expect(q.snapshot().currentUid).toBe('u2')
+    expect(q.replace([], undefined, false)).toEqual({ stop: true })
     expect(q.snapshot()).toEqual({ items: [], currentUid: null })
   })
 })
@@ -182,6 +210,7 @@ describe('next and prev', () => {
     q.add([v('a')])
     q.next()
     expect(q.add([v('b')])).toBeNull()
+    expect(q.snapshot().currentUid).toBe('u1')
   })
 
   it('does nothing without a current item', () => {

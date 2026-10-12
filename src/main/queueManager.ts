@@ -1,6 +1,6 @@
 import { parseYoutubeUrl } from '../shared/parseYoutubeUrl'
 import type { PlayerState, PlayerStatus, QueueState, QueueVideo, SavedQueue } from '../shared/types'
-import { MAX_QUEUE_ITEMS, isVideoId } from '../shared/validate'
+import { MAX_QUEUE_ITEMS, isVideoId, type LoadMode } from '../shared/validate'
 import { PlaybackQueue, type QueueAction } from './queue'
 
 export interface QueueManagerDeps {
@@ -87,14 +87,10 @@ export class QueueManager {
     this.publish()
   }
 
-  loadSaved(name: string): void {
-    const saved = this.deps.saved.list().find((q) => q.name === name)
-    if (!saved) {
-      this.deps.notify('Fila salva não encontrada.')
-      return
-    }
-    this.apply(this.queue.replace(saved.items))
-    this.fetchTitlesFor(saved.items.filter((i) => i.title === i.videoId).map((i) => i.videoId))
+  loadSaved(name: string, mode: LoadMode): Promise<void> {
+    const job = this.chain.then(() => this.doLoadSaved(name, mode))
+    this.chain = job.catch(() => undefined)
+    return job
   }
 
   deleteSaved(name: string): void {
@@ -172,14 +168,32 @@ export class QueueManager {
       }
     }
 
-    if (!playNow) {
-      const present = new Set(this.queue.snapshot().items.map((i) => i.videoId))
-      const duplicates = videos.filter((v) => present.has(v.videoId)).length
-      if (duplicates > 0 && !(await this.deps.confirmDuplicates({ duplicates, total: videos.length }))) return
-    }
+    if (!playNow && !(await this.confirmNoDuplicates(videos))) return
 
-    this.apply(playNow ? this.queue.replace(videos, startVideoId) : this.queue.add(videos))
+    this.apply(playNow ? this.queue.replace(videos, startVideoId, true) : this.queue.add(videos))
     this.fetchTitlesFor(videos.map((v) => v.videoId))
+  }
+
+  private async doLoadSaved(name: string, mode: LoadMode): Promise<void> {
+    const saved = this.deps.saved.list().find((q) => q.name === name)
+    if (!saved) {
+      this.deps.notify('Fila salva não encontrada.')
+      return
+    }
+    const items = saved.items.map(({ videoId, title }) => ({ videoId, title }))
+    if (mode === 'append') {
+      if (!(await this.confirmNoDuplicates(items))) return
+      this.apply(this.queue.add(items))
+    } else {
+      this.apply(this.queue.replace(items, undefined, false))
+    }
+    this.fetchTitlesFor(items.filter((i) => i.title === i.videoId).map((i) => i.videoId))
+  }
+
+  private async confirmNoDuplicates(videos: QueueVideo[]): Promise<boolean> {
+    const present = new Set(this.queue.snapshot().items.map((i) => i.videoId))
+    const duplicates = videos.filter((v) => present.has(v.videoId)).length
+    return duplicates === 0 || (await this.deps.confirmDuplicates({ duplicates, total: videos.length }))
   }
 
   private fetchTitlesFor(videoIds: string[]): void {

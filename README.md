@@ -13,12 +13,14 @@ npm test           # testes unitários
 
 ## Uso
 
-1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Se a fila estava vazia, começa a tocar. **Tocar agora** substitui a fila inteira pelo link. Se o vídeo já estiver na fila, o app pede confirmação antes de adicionar de novo.
+1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Adicionar não toca sozinho: se a fila estava vazia, o primeiro item fica apenas selecionado. Para tocar, use **Tocar agora** (substitui a fila inteira pelo link e toca), o botão ▶ ou clique no título de um item da fila. Se o vídeo já estiver na fila, o app pede confirmação antes de adicionar de novo.
 2. Playlists entram com todos os vídeos (até 200); os títulos aparecem aos poucos.
 3. Na fila: arraste para reordenar, ✕ remove, clique no título para tocar aquele item, **Limpar** esvazia.
-4. Escolha o monitor em "Monitor de reprodução" (**Identificar** mostra o número em cada tela).
+4. O menu **☰** (canto superior esquerdo) reúne três blocos:
+   - **Monitor**: escolha o monitor de reprodução (**Identificar** mostra o número em cada tela).
+   - **Salvar fila**: guarda a fila atual com um nome.
+   - **Filas salvas**: **Adicionar** acrescenta os itens ao fim da fila atual (sem tocar), **Substituir** troca a fila atual, seleciona o primeiro item e para o player (sem tocar) e **Excluir** apaga a fila salva. A fila ativa não é restaurada ao abrir o app.
 5. Use play/pause, anterior/próximo, seek e volume. **Parar** fecha o player e mantém a fila.
-6. **Salvar fila** guarda a fila atual com um nome; em "Filas salvas", **Carregar** substitui a fila atual e **Excluir** apaga a salva. A fila ativa não é restaurada ao abrir o app.
 
 ## Limitações
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   MAX_QUEUE_NAME,
   isListId,
+  isLoadMode,
   isMoveIndex,
   isUid,
   isUrlText,
@@ -73,5 +74,15 @@ describe('isUrlText', () => {
 
   it.each(['', 'a'.repeat(2049), 5, null])('rejects %j', (value) => {
     expect(isUrlText(value)).toBe(false)
+  })
+})
+
+describe('isLoadMode', () => {
+  it.each(['append', 'replace'])('accepts %j', (value) => {
+    expect(isLoadMode(value)).toBe(true)
+  })
+
+  it.each(['', 'Append', 'play', 1, null, undefined, {}])('rejects %j', (value) => {
+    expect(isLoadMode(value)).toBe(false)
   })
 })

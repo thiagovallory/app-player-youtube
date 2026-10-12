@@ -1,4 +1,6 @@
 import type { QueueItem, QueueState } from '../../shared/types'
+import type { LoadMode } from '../../shared/validate'
+import { CLOSE_MENU_EVENT } from './menu'
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 
@@ -13,9 +15,8 @@ export async function initQueue(): Promise<void> {
   const clear = byId<HTMLButtonElement>('queue-clear')
   const nameInput = byId<HTMLInputElement>('queue-name')
   const save = byId<HTMLButtonElement>('queue-save')
-  const saved = byId<HTMLSelectElement>('saved-queues')
-  const load = byId<HTMLButtonElement>('saved-load')
-  const del = byId<HTMLButtonElement>('saved-delete')
+  const savedList = byId<HTMLUListElement>('saved-list')
+  const savedEmpty = byId<HTMLElement>('saved-empty')
 
   let dragUid: string | null = null
   let pushed = false
@@ -75,6 +76,38 @@ export async function initQueue(): Promise<void> {
     return li
   }
 
+  const savedRow = (name: string): HTMLLIElement => {
+    const li = document.createElement('li')
+    const label = document.createElement('span')
+    label.className = 'saved-name'
+    label.textContent = name
+    label.title = name
+
+    const action = (className: string, text: string, onClick: () => void) => {
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = className
+      button.textContent = text
+      button.setAttribute('aria-label', `${text} fila ${name}`)
+      button.addEventListener('click', onClick)
+      return button
+    }
+    const load = (mode: LoadMode) => () => {
+      window.control.queueLoadSaved(name, mode)
+      document.dispatchEvent(new CustomEvent(CLOSE_MENU_EVENT))
+    }
+
+    li.append(
+      label,
+      action('saved-append', 'Adicionar', load('append')),
+      action('saved-replace', 'Substituir', load('replace')),
+      action('saved-delete', 'Excluir', () => {
+        if (confirm(`Excluir a fila "${name}"?`)) window.control.queueDeleteSaved(name)
+      }),
+    )
+    return li
+  }
+
   const render = (next: QueueState) => {
     state = next
     currentUid = next.currentUid
@@ -84,13 +117,8 @@ export async function initQueue(): Promise<void> {
     save.disabled = next.items.length === 0
     list.replaceChildren(...next.items.map(row))
 
-    const previous = saved.value
-    saved.replaceChildren(
-      ...next.saved.map((name) => Object.assign(document.createElement('option'), { value: name, textContent: name })),
-    )
-    if (next.saved.includes(previous)) saved.value = previous
-    load.disabled = next.saved.length === 0
-    del.disabled = next.saved.length === 0
+    savedEmpty.hidden = next.saved.length > 0
+    savedList.replaceChildren(...next.saved.map(savedRow))
   }
 
   const saveCurrent = () => {
@@ -107,13 +135,6 @@ export async function initQueue(): Promise<void> {
   nameInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') saveCurrent()
   })
-  load.addEventListener('click', () => {
-    if (saved.value) window.control.queueLoadSaved(saved.value)
-  })
-  del.addEventListener('click', () => {
-    if (saved.value && confirm(`Excluir a fila "${saved.value}"?`)) window.control.queueDeleteSaved(saved.value)
-  })
-
   window.control.onQueueState((next) => {
     pushed = true
     render(next)

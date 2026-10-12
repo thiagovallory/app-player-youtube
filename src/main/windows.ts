@@ -19,9 +19,10 @@ function lockDown(win: BrowserWindow): void {
 
 export function createControlWindow(baseUrl: string): BrowserWindow {
   const win = new BrowserWindow({
-    width: 560,
-    height: 760,
-    minWidth: 460,
+    width: 440,
+    height: 620,
+    minWidth: 360,
+    minHeight: 480,
     title: 'Player YouTube',
     backgroundColor: '#111111',
     webPreferences: webPreferences('control'),
