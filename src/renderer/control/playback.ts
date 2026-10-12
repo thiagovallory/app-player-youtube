@@ -3,6 +3,8 @@ import type { PlayerState } from '../../shared/types'
 import { icon } from './icons'
 import { getCurrentUid } from './queue'
 
+const URL_ERROR_MS = 5000
+
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 
 const STATUS_TEXT: Record<PlayerState['status'], string> = {
@@ -54,20 +56,29 @@ export async function initPlayback(): Promise<void> {
   let seeking = false
   let status: PlayerState['status'] = 'idle'
 
+  let urlErrorTimer: ReturnType<typeof setTimeout> | undefined
+  const hideUrlError = () => {
+    clearTimeout(urlErrorTimer)
+    urlError.hidden = true
+  }
+
   const submit = (playNow: boolean) => {
     notice.hidden = true
     if (!parseYoutubeUrl(url.value)) {
       urlError.textContent = 'Link inválido. Cole um link de vídeo ou playlist do YouTube.'
       urlError.hidden = false
+      clearTimeout(urlErrorTimer)
+      urlErrorTimer = setTimeout(hideUrlError, URL_ERROR_MS)
       return
     }
-    urlError.hidden = true
+    hideUrlError()
     const value = url.value.trim()
     addHistoryOption(value)
     window.control.queueAdd(value, playNow)
     url.value = ''
   }
 
+  url.addEventListener('input', hideUrlError)
   byId('add-url').addEventListener('click', () => submit(false))
   byId('play-now').addEventListener('click', () => submit(true))
   url.addEventListener('keydown', (e) => {
