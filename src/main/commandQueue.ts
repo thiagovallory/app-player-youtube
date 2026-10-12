@@ -13,7 +13,13 @@ export class CommandQueue<T> {
     this.ready = true
     const flush = this.pending
     this.pending = []
-    for (const command of flush) this.send(command)
+    for (const command of flush) {
+      try {
+        this.send(command)
+      } catch (err) {
+        console.error('Failed to send queued player command', err)
+      }
+    }
   }
 
   reset(): void {

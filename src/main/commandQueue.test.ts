@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { CommandQueue } from './commandQueue'
 
 describe('CommandQueue', () => {
@@ -41,5 +41,21 @@ describe('CommandQueue', () => {
     expect(sent).toEqual([])
     queue.markReady()
     expect(sent).toEqual([2])
+  })
+
+  it('keeps flushing the remaining commands when one send throws', () => {
+    const sent: number[] = []
+    const queue = new CommandQueue<number>((c) => {
+      if (c === 2) throw new Error('boom')
+      sent.push(c)
+    })
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    queue.push(1)
+    queue.push(2)
+    queue.push(3)
+    expect(() => queue.markReady()).not.toThrow()
+    expect(sent).toEqual([1, 3])
+    expect(errors).toHaveBeenCalledTimes(1)
+    errors.mockRestore()
   })
 })

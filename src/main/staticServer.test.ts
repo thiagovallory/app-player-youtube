@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs'
 import { request } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -15,6 +15,8 @@ beforeEach(async () => {
   mkdirSync(join(root, 'player'), { recursive: true })
   writeFileSync(join(root, 'player', 'index.html'), '<h1>oi</h1>')
   writeFileSync(join(base, 'secret.txt'), 'secret')
+  writeFileSync(join(root, 'mod.mjs'), 'export {}')
+  symlinkSync(join(base, 'secret.txt'), join(root, 'link.txt'))
   server = await startStaticServer(root)
 })
 
@@ -51,5 +53,25 @@ describe('startStaticServer', () => {
     const res = await get('/%2e%2e/secret.txt')
     expect(res.status).toBe(403)
     expect(res.body).not.toContain('secret')
+  })
+
+  it('returns 404 for an invalid percent-encoding', async () => {
+    expect((await get('/%zz')).status).toBe(404)
+  })
+
+  it('ignores the query string', async () => {
+    expect((await get('/player/index.html?x=1')).status).toBe(200)
+  })
+
+  it('refuses a symlink that points outside the root', async () => {
+    const res = await get('/link.txt')
+    expect(res.status).toBe(403)
+    expect(res.body).not.toContain('secret')
+  })
+
+  it('serves .mjs with the javascript content type', async () => {
+    const res = await get('/mod.mjs')
+    expect(res.status).toBe(200)
+    expect(res.type).toBe('text/javascript; charset=utf-8')
   })
 })

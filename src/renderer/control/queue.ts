@@ -18,6 +18,7 @@ export async function initQueue(): Promise<void> {
   const del = byId<HTMLButtonElement>('saved-delete')
 
   let dragUid: string | null = null
+  let pushed = false
   let state: QueueState = { items: [], currentUid: null, expanding: false, saved: [] }
 
   const row = (item: QueueItem, index: number): HTMLLIElement => {
@@ -58,7 +59,9 @@ export async function initQueue(): Promise<void> {
         li.classList.add('drop-target')
       }
     })
-    li.addEventListener('dragleave', () => li.classList.remove('drop-target'))
+    li.addEventListener('dragleave', (e) => {
+      if (!li.contains(e.relatedTarget as Node | null)) li.classList.remove('drop-target')
+    })
     li.addEventListener('drop', (e) => {
       e.preventDefault()
       li.classList.remove('drop-target')
@@ -111,8 +114,10 @@ export async function initQueue(): Promise<void> {
     if (saved.value && confirm(`Excluir a fila "${saved.value}"?`)) window.control.queueDeleteSaved(saved.value)
   })
 
-  window.control.onQueueState(render)
+  window.control.onQueueState((next) => {
+    pushed = true
+    render(next)
+  })
   const initial = await window.control.queueGet()
-  if (initial) render(initial)
-  else render(state)
+  if (!pushed) render(initial ?? state)
 }

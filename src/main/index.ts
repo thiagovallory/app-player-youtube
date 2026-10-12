@@ -63,19 +63,39 @@ async function main(): Promise<void> {
   const isControl = (sender: WebContents) =>
     controlWin !== null && !controlWin.isDestroyed() && sender === controlWin.webContents
 
-  const controller = new PlayerController(baseUrl, () => toControl(STATE_TO_CONTROL, IDLE_STATE))
+  let manager: QueueManager
+  const controller = new PlayerController(baseUrl, () => {
+    manager.onPlayerClosed()
+    toControl(STATE_TO_CONTROL, IDLE_STATE)
+  })
 
-  const manager = new QueueManager({
+  manager = new QueueManager({
     expandPlaylist: (listId) => expandPlaylist(baseUrl, listId),
     fetchTitles: (ids, onTitle) => fetchTitles(ids, onTitle, (url, init) => net.fetch(url, init)),
-    playVideo: (videoId) => {
-      controller.send({ type: 'play-video', videoId }, target())
+    playVideo: (videoId, uid) => {
+      controller.send({ type: 'play-video', videoId, uid }, target())
       controller.send({ type: 'volume', value: store.get().volume }, target())
     },
     stopPlayer: () => controller.close(),
     addHistory: (url) => store.addHistory(url),
+    confirmDuplicates: async ({ duplicates, total }) => {
+      const options = {
+        type: 'question' as const,
+        buttons: ['Adicionar mesmo assim', 'Cancelar'],
+        defaultId: 1,
+        cancelId: 1,
+        message: total === 1 ? 'Este vídeo já está na fila.' : `${duplicates} de ${total} vídeos já estão na fila.`,
+        detail: 'Adicionar mesmo assim?',
+      }
+      const { response } =
+        controlWin && !controlWin.isDestroyed()
+          ? await dialog.showMessageBox(controlWin, options)
+          : await dialog.showMessageBox(options)
+      return response === 0
+    },
     saved: {
       list: () => store.get().queues,
+      names: () => store.queueNames(),
       save: (name, items) => store.saveQueue(name, items),
       delete: (name) => store.deleteQueue(name),
     },
@@ -124,12 +144,14 @@ async function main(): Promise<void> {
     else toControl(NOTICE, 'Nome de fila inválido (use de 1 a 100 caracteres).')
   })
   ipcMain.on(QUEUE_LOAD_SAVED, (event, name: unknown) => {
+    if (!isControl(event.sender)) return
     const clean = parseQueueName(name)
-    if (isControl(event.sender) && clean) manager.loadSaved(clean)
+    if (clean) manager.loadSaved(clean)
   })
   ipcMain.on(QUEUE_DELETE_SAVED, (event, name: unknown) => {
+    if (!isControl(event.sender)) return
     const clean = parseQueueName(name)
-    if (isControl(event.sender) && clean) manager.deleteSaved(clean)
+    if (clean) manager.deleteSaved(clean)
   })
 
   ipcMain.on(CMD_FROM_CONTROL, (event, cmd: PlayerCommand) => {

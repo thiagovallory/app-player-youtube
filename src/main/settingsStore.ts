@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import type { QueueVideo, SavedDisplay, SavedQueue, Settings } from '../shared/types'
-import { MAX_SAVED_QUEUES, isVideoId, parseQueueName } from '../shared/validate'
+import { MAX_QUEUE_ITEMS, MAX_SAVED_QUEUES, isVideoId, parseQueueName } from '../shared/validate'
 
 const MAX_HISTORY = 10
 
@@ -28,6 +28,7 @@ function isSavedQueue(v: unknown): v is SavedQueue {
     parseQueueName(q.name) === q.name &&
     Array.isArray(q.items) &&
     q.items.length > 0 &&
+    q.items.length <= MAX_QUEUE_ITEMS &&
     q.items.every(isQueueVideo)
   )
 }
@@ -48,6 +49,10 @@ export class SettingsStore {
     return { ...this.data, history: [...this.data.history], queues: this.data.queues.map(copyQueue) }
   }
 
+  queueNames(): string[] {
+    return this.data.queues.map((q) => q.name)
+  }
+
   setDisplay(display: SavedDisplay): void {
     this.data.display = display
     this.save()
@@ -66,7 +71,7 @@ export class SettingsStore {
 
   saveQueue(name: string, items: QueueVideo[]): boolean {
     const clean = parseQueueName(name)
-    if (!clean || items.length === 0 || !items.every(isQueueVideo)) return false
+    if (!clean || items.length === 0 || items.length > MAX_QUEUE_ITEMS || !items.every(isQueueVideo)) return false
     const saved = copyQueue({ name: clean, items })
     const index = this.data.queues.findIndex((q) => q.name === clean)
     if (index >= 0) {
@@ -103,7 +108,11 @@ export class SettingsStore {
   }
 
   private save(): void {
-    mkdirSync(dirname(this.file), { recursive: true })
-    writeFileSync(this.file, JSON.stringify(this.data, null, 2))
+    try {
+      mkdirSync(dirname(this.file), { recursive: true })
+      writeFileSync(this.file, JSON.stringify(this.data, null, 2))
+    } catch (err) {
+      console.error('Failed to save settings', err)
+    }
   }
 }

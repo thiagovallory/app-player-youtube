@@ -1,7 +1,7 @@
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SettingsStore } from './settingsStore'
 
 let file: string
@@ -49,6 +49,17 @@ describe('SettingsStore', () => {
     expect(history).toHaveLength(10)
     expect(history[0]).toBe('url-5')
     expect(history.filter((h) => h === 'url-5')).toHaveLength(1)
+  })
+
+  it('keeps in-memory state and does not throw when the file cannot be written', () => {
+    const blocker = join(mkdtempSync(join(tmpdir(), 'settings-')), 'blocker')
+    writeFileSync(blocker, 'i am a file')
+    const store = new SettingsStore(join(blocker, 'settings.json'))
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    expect(() => store.setVolume(30)).not.toThrow()
+    expect(store.get().volume).toBe(30)
+    expect(errors).toHaveBeenCalled()
+    errors.mockRestore()
   })
 
   it('falls back to defaults on corrupt JSON', () => {
@@ -102,6 +113,31 @@ describe('SettingsStore saved queues', () => {
     expect(store.saveQueue('one-more', [{ videoId: A, title: 'A' }])).toBe(false)
     expect(store.saveQueue('q0', [{ videoId: B, title: 'B' }])).toBe(true)
     expect(store.get().queues).toHaveLength(50)
+  })
+
+  it('rejects queues with more than 200 items', () => {
+    const store = new SettingsStore(file)
+    const item = { videoId: A, title: 'A' }
+    expect(store.saveQueue('Big', Array.from({ length: 201 }, () => item))).toBe(false)
+    expect(store.saveQueue('Max', Array.from({ length: 200 }, () => item))).toBe(true)
+  })
+
+  it('drops saved queues with more than 200 items on read', () => {
+    const store = new SettingsStore(file)
+    store.setVolume(10)
+    const item = { videoId: A, title: 'A' }
+    writeFileSync(
+      file,
+      JSON.stringify({ queues: [{ name: 'Big', items: Array.from({ length: 201 }, () => item) }] }),
+    )
+    expect(new SettingsStore(file).get().queues).toEqual([])
+  })
+
+  it('lists queue names without copying the queues', () => {
+    const store = new SettingsStore(file)
+    store.saveQueue('One', [{ videoId: A, title: 'A' }])
+    store.saveQueue('Two', [{ videoId: B, title: 'B' }])
+    expect(store.queueNames()).toEqual(['One', 'Two'])
   })
 
   it('deletes a queue', () => {

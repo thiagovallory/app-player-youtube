@@ -16,17 +16,21 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
   const player = { open: true }
   const saved: SavedQueue[] = []
   const played: string[] = []
+  const playedUids: string[] = []
   const published: QueueState[] = []
   const notices: string[] = []
   const history: string[] = []
+  const confirms: { duplicates: number; total: number }[] = []
+  const answer = { value: true }
   const titles: Record<string, string> = {}
   const deps: QueueManagerDeps = {
     expandPlaylist: async () => [V1, V2, V3],
     fetchTitles: async (ids, onTitle) => {
       for (const id of ids) if (titles[id]) onTitle(id, titles[id])
     },
-    playVideo: (id) => {
+    playVideo: (id, uid) => {
       played.push(id)
+      playedUids.push(uid)
     },
     stopPlayer: () => {
       stops++
@@ -36,6 +40,7 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
     },
     saved: {
       list: () => saved,
+      names: () => saved.map((q) => q.name),
       save: (name, items) => {
         if (!name || items.length === 0) return false
         const index = saved.findIndex((q) => q.name === name)
@@ -48,6 +53,10 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
         if (index >= 0) saved.splice(index, 1)
       },
     },
+    confirmDuplicates: async (info) => {
+      confirms.push(info)
+      return answer.value
+    },
     publish: (state) => {
       published.push(state)
     },
@@ -58,7 +67,7 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
     ...overrides,
   }
   const manager = new QueueManager(deps, new PlaybackQueue(() => `u${++n}`))
-  return { manager, player, played, published, notices, history, titles, saved, stops: () => stops }
+  return { manager, player, played, playedUids, published, notices, history, titles, saved, confirms, answer, stops: () => stops }
 }
 
 const ids = (m: QueueManager) => m.state().items.map((i) => i.videoId)
@@ -190,6 +199,80 @@ describe('QueueManager.add', () => {
   })
 })
 
+describe('QueueManager duplicate confirmation', () => {
+  it('asks before adding a video already in the queue', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V1), false)
+    expect(t.confirms).toEqual([{ duplicates: 1, total: 1 }])
+    expect(ids(t.manager)).toEqual([V1, V1])
+  })
+
+  it('adds nothing when the user declines', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    t.answer.value = false
+    await t.manager.add(url(V1), false)
+    expect(ids(t.manager)).toEqual([V1])
+    expect(t.played).toEqual([V1])
+  })
+
+  it('does not fetch titles when declined', async () => {
+    let fetched = 0
+    const t = setup({
+      fetchTitles: async () => {
+        fetched++
+      },
+    })
+    await t.manager.add(url(V1), false)
+    t.answer.value = false
+    await t.manager.add(url(V1), false)
+    await t.manager.settled()
+    expect(fetched).toBe(1)
+  })
+
+  it('asks once for a playlist, counting the duplicates', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(`${url(V2)}`, false)
+    await t.manager.add(playlistUrl, false)
+    expect(t.confirms).toEqual([{ duplicates: 2, total: 3 }])
+    expect(ids(t.manager)).toEqual([V1, V2, V1, V2, V3])
+  })
+
+  it('never asks for play now', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V1), true)
+    expect(t.confirms).toEqual([])
+  })
+
+  it('never asks without duplicates', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V2), false)
+    expect(t.confirms).toEqual([])
+  })
+
+  it('keeps request order while a confirmation is pending', async () => {
+    let release!: (ok: boolean) => void
+    const t = setup({
+      confirmDuplicates: () =>
+        new Promise<boolean>((resolve) => {
+          release = resolve
+        }),
+    })
+    await t.manager.add(url(V1), false)
+    const dup = t.manager.add(url(V1), false)
+    const other = t.manager.add(url(V2), false)
+    await flush()
+    expect(ids(t.manager)).toEqual([V1])
+    release(true)
+    await Promise.all([dup, other])
+    expect(ids(t.manager)).toEqual([V1, V1, V2])
+  })
+})
+
 describe('QueueManager.onPlayerState', () => {
   it('advances once when a video ends', async () => {
     const t = setup()
@@ -240,9 +323,9 @@ describe('QueueManager stale player reports', () => {
     const t = setup()
     await t.manager.add(playlistUrl, false)
     t.manager.next()
-    t.manager.onPlayerState(state('ended', { videoId: V1 }))
+    t.manager.onPlayerState(state('ended', { uid: 'u1' }))
     expect(t.played).toEqual([V1, V2])
-    t.manager.onPlayerState(state('ended', { videoId: V2 }))
+    t.manager.onPlayerState(state('ended', { uid: 'u2' }))
     expect(t.played).toEqual([V1, V2, V3])
   })
 
@@ -250,9 +333,23 @@ describe('QueueManager stale player reports', () => {
     const t = setup()
     await t.manager.add(playlistUrl, false)
     t.manager.next()
-    t.manager.onPlayerState(state('error', { videoId: V1, skip: true, error: 'x' }))
+    t.manager.onPlayerState(state('error', { uid: 'u1', skip: true, error: 'x' }))
     expect(t.played).toEqual([V1, V2])
     expect(t.notices).toEqual([])
+  })
+
+  it('tells apart the same video in two consecutive items by uid', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    t.answer.value = true
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V2), false)
+    t.manager.next()
+    expect(t.playedUids).toEqual(['u1', 'u2'])
+    t.manager.onPlayerState(state('ended', { uid: 'u1' }))
+    expect(t.played).toEqual([V1, V1])
+    t.manager.onPlayerState(state('ended', { uid: 'u2' }))
+    expect(t.played).toEqual([V1, V1, V2])
   })
 
   it('does not announce a skip when there is no next item', async () => {
@@ -261,6 +358,44 @@ describe('QueueManager stale player reports', () => {
     t.manager.onPlayerState(state('error', { skip: true, error: 'x' }))
     expect(t.notices).toEqual([])
     expect(t.played).toEqual([V1])
+  })
+})
+
+describe('QueueManager.onPlayerClosed', () => {
+  it('resets the last seen status', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    t.manager.onPlayerState(state('ended'))
+    expect(t.manager['lastStatus']).toBe('ended')
+    t.manager.onPlayerClosed()
+    expect(t.manager['lastStatus']).toBe('idle')
+  })
+})
+
+describe('QueueManager playlist fallback', () => {
+  const linked = `${url(V2)}&list=${LIST}`
+
+  for (const [label, expand] of [
+    ['an error', async () => Promise.reject(new Error('boom'))],
+    ['an empty list', async () => []],
+  ] as const) {
+    for (const playNow of [false, true]) {
+      it(`falls back to the single video on ${label} (playNow=${playNow})`, async () => {
+        const t = setup({ expandPlaylist: expand })
+        await t.manager.add(linked, playNow)
+        expect(ids(t.manager)).toEqual([V2])
+        expect(t.played).toEqual([V2])
+        expect(t.notices).toEqual(['Não foi possível ler a playlist; adicionando só o vídeo.'])
+        expect(t.manager.state().expanding).toBe(false)
+      })
+    }
+  }
+
+  it('still fails for a playlist-only link', async () => {
+    const t = setup({ expandPlaylist: async () => Promise.reject(new Error('boom')) })
+    await t.manager.add(playlistUrl, false)
+    expect(ids(t.manager)).toEqual([])
+    expect(t.notices[0]).toContain('boom')
   })
 })
 
@@ -348,7 +483,23 @@ describe('QueueManager saved queues', () => {
   it('notifies when saving fails', () => {
     const t = setup()
     t.manager.save('Empty')
-    expect(t.notices).toHaveLength(1)
+    expect(t.notices).toEqual([
+      'Não foi possível salvar a fila (nome inválido, fila vazia, mais de 200 itens ou limite de filas atingido).',
+    ])
+  })
+
+  it('builds state from names without listing the saved queues', async () => {
+    const t = setup({
+      saved: {
+        list: () => {
+          throw new Error('should not copy all queues')
+        },
+        names: () => ['A', 'B'],
+        save: () => true,
+        delete: () => undefined,
+      },
+    })
+    expect(t.manager.state().saved).toEqual(['A', 'B'])
   })
 
   it('loads a saved queue, replacing the current one and playing it', async () => {
