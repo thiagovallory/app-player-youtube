@@ -6,7 +6,7 @@ import { PlaybackQueue, type QueueAction } from './queue'
 export interface QueueManagerDeps {
   expandPlaylist(listId: string): Promise<string[]>
   fetchTitles(videoIds: string[], onTitle: (videoId: string, title: string) => void): Promise<void>
-  playVideo(videoId: string): void
+  playVideo(videoId: string, uid: string): void
   stopPlayer(): void
   addHistory(url: string): void
   confirmDuplicates(info: { duplicates: number; total: number }): Promise<boolean>
@@ -103,7 +103,7 @@ export class QueueManager {
 
   onPlayerState(state: PlayerState): void {
     const advancing = state.status === 'ended' || (state.status === 'error' && state.skip === true)
-    if (advancing && state.videoId !== undefined && state.videoId !== this.currentVideoId()) return
+    if (advancing && state.uid !== undefined && state.uid !== this.queue.snapshot().currentUid) return
     const previous = this.lastStatus
     this.lastStatus = state.status
     const ended = state.status === 'ended' && previous !== 'ended'
@@ -118,11 +118,6 @@ export class QueueManager {
 
   async settled(): Promise<void> {
     while (this.titleJobs.size > 0) await Promise.allSettled([...this.titleJobs])
-  }
-
-  private currentVideoId(): string | undefined {
-    const { items, currentUid } = this.queue.snapshot()
-    return items.find((i) => i.uid === currentUid)?.videoId
   }
 
   private async doAdd(url: string, playNow: boolean): Promise<void> {
@@ -188,7 +183,7 @@ export class QueueManager {
   private apply(action: QueueAction): void {
     if (action && 'play' in action) {
       this.lastStatus = 'idle'
-      this.deps.playVideo(action.play.videoId)
+      this.deps.playVideo(action.play.videoId, action.play.uid)
     } else if (action) {
       this.lastStatus = 'idle'
       this.deps.stopPlayer()

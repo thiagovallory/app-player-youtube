@@ -82,7 +82,7 @@ function exec(cmd: PlayerCommand): void {
         duration: 0,
         error: undefined,
         skip: undefined,
-        videoId: cmd.videoId,
+        uid: cmd.uid,
       })
       yt.loadVideoById(cmd.videoId)
       break

@@ -68,8 +68,8 @@ async function main(): Promise<void> {
   const manager = new QueueManager({
     expandPlaylist: (listId) => expandPlaylist(baseUrl, listId),
     fetchTitles: (ids, onTitle) => fetchTitles(ids, onTitle, (url, init) => net.fetch(url, init)),
-    playVideo: (videoId) => {
-      controller.send({ type: 'play-video', videoId }, target())
+    playVideo: (videoId, uid) => {
+      controller.send({ type: 'play-video', videoId, uid }, target())
       controller.send({ type: 'volume', value: store.get().volume }, target())
     },
     stopPlayer: () => controller.close(),

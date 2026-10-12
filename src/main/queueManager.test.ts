@@ -16,6 +16,7 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
   const player = { open: true }
   const saved: SavedQueue[] = []
   const played: string[] = []
+  const playedUids: string[] = []
   const published: QueueState[] = []
   const notices: string[] = []
   const history: string[] = []
@@ -27,8 +28,9 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
     fetchTitles: async (ids, onTitle) => {
       for (const id of ids) if (titles[id]) onTitle(id, titles[id])
     },
-    playVideo: (id) => {
+    playVideo: (id, uid) => {
       played.push(id)
+      playedUids.push(uid)
     },
     stopPlayer: () => {
       stops++
@@ -64,7 +66,7 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
     ...overrides,
   }
   const manager = new QueueManager(deps, new PlaybackQueue(() => `u${++n}`))
-  return { manager, player, played, published, notices, history, titles, saved, confirms, answer, stops: () => stops }
+  return { manager, player, played, playedUids, published, notices, history, titles, saved, confirms, answer, stops: () => stops }
 }
 
 const ids = (m: QueueManager) => m.state().items.map((i) => i.videoId)
@@ -320,9 +322,9 @@ describe('QueueManager stale player reports', () => {
     const t = setup()
     await t.manager.add(playlistUrl, false)
     t.manager.next()
-    t.manager.onPlayerState(state('ended', { videoId: V1 }))
+    t.manager.onPlayerState(state('ended', { uid: 'u1' }))
     expect(t.played).toEqual([V1, V2])
-    t.manager.onPlayerState(state('ended', { videoId: V2 }))
+    t.manager.onPlayerState(state('ended', { uid: 'u2' }))
     expect(t.played).toEqual([V1, V2, V3])
   })
 
@@ -330,9 +332,23 @@ describe('QueueManager stale player reports', () => {
     const t = setup()
     await t.manager.add(playlistUrl, false)
     t.manager.next()
-    t.manager.onPlayerState(state('error', { videoId: V1, skip: true, error: 'x' }))
+    t.manager.onPlayerState(state('error', { uid: 'u1', skip: true, error: 'x' }))
     expect(t.played).toEqual([V1, V2])
     expect(t.notices).toEqual([])
+  })
+
+  it('tells apart the same video in two consecutive items by uid', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    t.answer.value = true
+    await t.manager.add(url(V1), false)
+    await t.manager.add(url(V2), false)
+    t.manager.next()
+    expect(t.playedUids).toEqual(['u1', 'u2'])
+    t.manager.onPlayerState(state('ended', { uid: 'u1' }))
+    expect(t.played).toEqual([V1, V1])
+    t.manager.onPlayerState(state('ended', { uid: 'u2' }))
+    expect(t.played).toEqual([V1, V1, V2])
   })
 
   it('does not announce a skip when there is no next item', async () => {

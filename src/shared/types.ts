@@ -3,7 +3,7 @@ export type YoutubeTarget =
   | { type: 'playlist'; listId: string }
 
 export type PlayerCommand =
-  | { type: 'play-video'; videoId: string }
+  | { type: 'play-video'; videoId: string; uid: string }
   | { type: 'play' }
   | { type: 'pause' }
   | { type: 'next' }
@@ -21,7 +21,7 @@ export interface PlayerState {
   duration: number
   error?: string
   skip?: boolean
-  videoId?: string
+  uid?: string
 }
 
 export const IDLE_STATE: PlayerState = { status: 'idle', title: '', currentTime: 0, duration: 0 }
