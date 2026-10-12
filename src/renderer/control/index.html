@@ -13,7 +13,8 @@
         <div class="row">
           <input id="url" type="text" list="history" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
           <datalist id="history"></datalist>
-          <button id="play-url" type="button">Tocar</button>
+          <button id="add-url" type="button">Adicionar à fila</button>
+          <button id="play-now" type="button">Tocar agora</button>
         </div>
         <p id="url-error" class="error" hidden></p>
       </section>
@@ -41,6 +42,30 @@
         </div>
         <label for="volume">Volume</label>
         <input id="volume" type="range" min="0" max="100" step="1" value="100" />
+      </section>
+
+      <section class="queue">
+        <div class="row space">
+          <span class="label">Fila de reprodução</span>
+          <button id="queue-clear" type="button">Limpar</button>
+        </div>
+        <p id="queue-status" class="muted" hidden>Carregando playlist…</p>
+        <p id="queue-empty" class="muted">A fila está vazia. Adicione um link acima.</p>
+        <ul id="queue" aria-label="Fila de reprodução"></ul>
+      </section>
+
+      <section>
+        <label for="queue-name">Salvar fila</label>
+        <div class="row">
+          <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />
+          <button id="queue-save" type="button">Salvar</button>
+        </div>
+        <label for="saved-queues">Filas salvas</label>
+        <div class="row">
+          <select id="saved-queues"></select>
+          <button id="saved-load" type="button">Carregar</button>
+          <button id="saved-delete" type="button">Excluir</button>
+        </div>
       </section>
 
       <p id="notice" class="warn" hidden></p>

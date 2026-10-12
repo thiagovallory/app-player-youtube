@@ -11,10 +11,22 @@ input[type='range'] { width: 100%; }
 button { padding: 8px 14px; background: #2d6cdf; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font: inherit; }
 button:hover { background: #3b7af0; }
 #prev, #toggle, #next { font-size: 18px; min-width: 48px; }
-#stop, #identify { background: #3a3a3a; }
+#stop, #identify, #play-now { background: #3a3a3a; }
 .now h1 { margin: 0; font-size: 18px; overflow-wrap: anywhere; }
 .times { display: flex; justify-content: space-between; color: #aaa; font-variant-numeric: tabular-nums; }
 .muted { margin: 0; color: #aaa; }
 .error { margin: 0; color: #ff6b6b; }
 .warn { margin: 0; color: #f0c040; }
 [hidden] { display: none !important; }
+.row.space { justify-content: space-between; }
+.label { font-weight: 600; }
+button:disabled { opacity: 0.5; cursor: default; }
+#queue { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+#queue li { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: #1e1e1e; border: 1px solid #333; border-radius: 6px; cursor: grab; }
+#queue li.current { border-color: #2d6cdf; background: #1a2740; }
+#queue li.drop-target { border-color: #f0c040; }
+.handle { color: #777; user-select: none; }
+.queue-title { flex: 1; min-width: 0; text-align: left; background: transparent; padding: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queue-title:hover { background: #2a2a2a; }
+.queue-remove { background: transparent; color: #aaa; padding: 4px 8px; }
+.queue-remove:hover { background: #4a2020; color: #fff; }

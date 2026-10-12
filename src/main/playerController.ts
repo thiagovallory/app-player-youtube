@@ -14,7 +14,7 @@ type Mode = 'screen' | 'window'
 export class PlayerController {
   private win: BrowserWindow | null = null
   private mode: Mode = 'screen'
-  private lastLoad: PlayerCommand | null = null
+  private lastPlay: PlayerCommand | null = null
   private lastVolume: PlayerCommand | null = null
   private readonly queue = new CommandQueue<PlayerCommand>((cmd) =>
     this.win?.webContents.send(CMD_TO_PLAYER, cmd),
@@ -42,10 +42,10 @@ export class PlayerController {
       this.close()
       return
     }
-    if (!this.win && cmd.type !== 'load') return
-    if (cmd.type === 'load') {
-      const replay = this.lastLoad
-      this.lastLoad = cmd
+    if (!this.win && cmd.type !== 'play-video') return
+    if (cmd.type === 'play-video') {
+      const replay = this.lastPlay
+      this.lastPlay = cmd
       this.place(target, replay)
     } else if (cmd.type === 'volume') {
       this.lastVolume = cmd
@@ -54,13 +54,13 @@ export class PlayerController {
   }
 
   reposition(target: PlayerTarget): void {
-    if (this.win) this.place(target, this.lastLoad)
+    if (this.win) this.place(target, this.lastPlay)
   }
 
   close(): void {
     if (!this.win) return
     this.destroy()
-    this.lastLoad = null
+    this.lastPlay = null
     this.lastVolume = null
     this.onClosed()
   }
@@ -88,7 +88,7 @@ export class PlayerController {
     win.on('closed', () => {
       if (this.win !== win) return
       this.win = null
-      this.lastLoad = null
+      this.lastPlay = null
       this.lastVolume = null
       this.queue.reset()
       this.onClosed()
