@@ -608,10 +608,12 @@ describe('QueueManager.loadSaved', () => {
     })
     t.saved.push(mix)
     await t.manager.add(url(V2), false)
+    await t.manager.settled()
+    const before = fetched
     t.answer.value = false
     await t.manager.loadSaved('Mix', 'append')
     await t.manager.settled()
-    expect(fetched).toBe(1)
+    expect(fetched).toBe(before)
   })
 
   it('replace swaps the queue, selects the first item and stops the player without playing', async () => {
