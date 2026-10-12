@@ -146,7 +146,7 @@ async function main(): Promise<void> {
   ipcMain.on(QUEUE_LOAD_SAVED, (event, name: unknown) => {
     if (!isControl(event.sender)) return
     const clean = parseQueueName(name)
-    if (clean) manager.loadSaved(clean)
+    if (clean) manager.loadSaved(clean, 'replace').catch((err) => toControl(NOTICE, String(err)))
   })
   ipcMain.on(QUEUE_DELETE_SAVED, (event, name: unknown) => {
     if (!isControl(event.sender)) return
