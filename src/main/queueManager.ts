@@ -12,6 +12,7 @@ export interface QueueManagerDeps {
   confirmDuplicates(info: { duplicates: number; total: number }): Promise<boolean>
   saved: {
     list(): SavedQueue[]
+    names(): string[]
     save(name: string, items: QueueVideo[]): boolean
     delete(name: string): void
   }
@@ -37,7 +38,7 @@ export class QueueManager {
       items,
       currentUid,
       expanding: this.expanding > 0,
-      saved: this.deps.saved.list().map((q) => q.name),
+      saved: this.deps.saved.names(),
     }
   }
 
@@ -80,7 +81,7 @@ export class QueueManager {
   save(name: string): void {
     const items = this.queue.snapshot().items.map(({ videoId, title }) => ({ videoId, title }))
     if (!this.deps.saved.save(name, items)) {
-      this.deps.notify('Não foi possível salvar a fila (nome inválido, fila vazia ou limite de filas atingido).')
+      this.deps.notify('Não foi possível salvar a fila (nome inválido, fila vazia, mais de 200 itens ou limite de filas atingido).')
       return
     }
     this.publish()
@@ -99,6 +100,10 @@ export class QueueManager {
   deleteSaved(name: string): void {
     this.deps.saved.delete(name)
     this.publish()
+  }
+
+  onPlayerClosed(): void {
+    this.lastStatus = 'idle'
   }
 
   onPlayerState(state: PlayerState): void {
@@ -128,36 +133,43 @@ export class QueueManager {
     }
     this.deps.addHistory(url.trim())
 
+    const single: QueueVideo[] | null =
+      target.type === 'video' ? [{ videoId: target.id, title: target.id }] : null
     let videos: QueueVideo[]
     let startVideoId: string | undefined
-    if (target.type === 'video' && !target.listId) {
-      videos = [{ videoId: target.id, title: target.id }]
+    if (single && !target.listId) {
+      videos = single
     } else {
       const listId = target.listId
       if (!listId) return
-      let ids: string[]
+      let ids: string[] = []
+      let failure: string | null = null
       this.expanding++
       this.publish()
       try {
-        ids = await this.deps.expandPlaylist(listId)
+        ids = (await this.deps.expandPlaylist(listId)).filter(isVideoId)
+        if (ids.length === 0) failure = 'A playlist está vazia ou indisponível.'
       } catch (err) {
-        this.deps.notify(`Não foi possível ler a playlist: ${err instanceof Error ? err.message : String(err)}`)
-        return
+        failure = `Não foi possível ler a playlist: ${err instanceof Error ? err.message : String(err)}`
       } finally {
         this.expanding--
         this.publish()
       }
-      ids = ids.filter(isVideoId)
-      if (ids.length === 0) {
-        this.deps.notify('A playlist está vazia ou indisponível.')
-        return
+      if (failure !== null) {
+        if (!single) {
+          this.deps.notify(failure)
+          return
+        }
+        this.deps.notify('Não foi possível ler a playlist; adicionando só o vídeo.')
+        videos = single
+      } else {
+        if (ids.length > MAX_QUEUE_ITEMS) {
+          ids = ids.slice(0, MAX_QUEUE_ITEMS)
+          this.deps.notify(`Playlist cortada nos primeiros ${MAX_QUEUE_ITEMS} vídeos.`)
+        }
+        videos = ids.map((videoId) => ({ videoId, title: videoId }))
+        if (target.type === 'video') startVideoId = target.id
       }
-      if (ids.length > MAX_QUEUE_ITEMS) {
-        ids = ids.slice(0, MAX_QUEUE_ITEMS)
-        this.deps.notify(`Playlist cortada nos primeiros ${MAX_QUEUE_ITEMS} vídeos.`)
-      }
-      videos = ids.map((videoId) => ({ videoId, title: videoId }))
-      if (target.type === 'video') startVideoId = target.id
     }
 
     if (!playNow) {

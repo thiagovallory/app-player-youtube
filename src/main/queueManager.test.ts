@@ -40,6 +40,7 @@ function setup(overrides: Partial<QueueManagerDeps> = {}) {
     },
     saved: {
       list: () => saved,
+      names: () => saved.map((q) => q.name),
       save: (name, items) => {
         if (!name || items.length === 0) return false
         const index = saved.findIndex((q) => q.name === name)
@@ -360,6 +361,44 @@ describe('QueueManager stale player reports', () => {
   })
 })
 
+describe('QueueManager.onPlayerClosed', () => {
+  it('resets the last seen status', async () => {
+    const t = setup()
+    await t.manager.add(url(V1), false)
+    t.manager.onPlayerState(state('ended'))
+    expect(t.manager['lastStatus']).toBe('ended')
+    t.manager.onPlayerClosed()
+    expect(t.manager['lastStatus']).toBe('idle')
+  })
+})
+
+describe('QueueManager playlist fallback', () => {
+  const linked = `${url(V2)}&list=${LIST}`
+
+  for (const [label, expand] of [
+    ['an error', async () => Promise.reject(new Error('boom'))],
+    ['an empty list', async () => []],
+  ] as const) {
+    for (const playNow of [false, true]) {
+      it(`falls back to the single video on ${label} (playNow=${playNow})`, async () => {
+        const t = setup({ expandPlaylist: expand })
+        await t.manager.add(linked, playNow)
+        expect(ids(t.manager)).toEqual([V2])
+        expect(t.played).toEqual([V2])
+        expect(t.notices).toEqual(['Não foi possível ler a playlist; adicionando só o vídeo.'])
+        expect(t.manager.state().expanding).toBe(false)
+      })
+    }
+  }
+
+  it('still fails for a playlist-only link', async () => {
+    const t = setup({ expandPlaylist: async () => Promise.reject(new Error('boom')) })
+    await t.manager.add(playlistUrl, false)
+    expect(ids(t.manager)).toEqual([])
+    expect(t.notices[0]).toContain('boom')
+  })
+})
+
 describe('QueueManager editing', () => {
   it('adding after removing the last current item starts playing', async () => {
     const t = setup()
@@ -444,7 +483,23 @@ describe('QueueManager saved queues', () => {
   it('notifies when saving fails', () => {
     const t = setup()
     t.manager.save('Empty')
-    expect(t.notices).toHaveLength(1)
+    expect(t.notices).toEqual([
+      'Não foi possível salvar a fila (nome inválido, fila vazia, mais de 200 itens ou limite de filas atingido).',
+    ])
+  })
+
+  it('builds state from names without listing the saved queues', async () => {
+    const t = setup({
+      saved: {
+        list: () => {
+          throw new Error('should not copy all queues')
+        },
+        names: () => ['A', 'B'],
+        save: () => true,
+        delete: () => undefined,
+      },
+    })
+    expect(t.manager.state().saved).toEqual(['A', 'B'])
   })
 
   it('loads a saved queue, replacing the current one and playing it', async () => {
