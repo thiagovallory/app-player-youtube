@@ -12,7 +12,7 @@ beforeEach(() => {
 
 describe('SettingsStore', () => {
   it('returns defaults when the file does not exist', () => {
-    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [] })
+    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [], queues: [] })
   })
 
   it('persists display, volume and history across instances', () => {
@@ -25,6 +25,7 @@ describe('SettingsStore', () => {
       display: { id: 2, x: 1920, y: 0, width: 1920, height: 1080 },
       volume: 40,
       history: ['https://youtu.be/dQw4w9WgXcQ'],
+      queues: [],
     })
   })
 
@@ -54,13 +55,87 @@ describe('SettingsStore', () => {
     const store = new SettingsStore(file)
     store.setVolume(10)
     writeFileSync(file, '{not json')
-    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [] })
+    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [], queues: [] })
   })
 
   it('drops invalid field types', () => {
     const store = new SettingsStore(file)
     store.setVolume(10)
     writeFileSync(file, JSON.stringify({ volume: 'loud', history: [1, 'ok'], display: { id: 'x' } }))
-    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: ['ok'] })
+    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: ['ok'], queues: [] })
+  })
+})
+
+const A = 'aaaaaaaaaaa'
+const B = 'bbbbbbbbbbb'
+
+describe('SettingsStore saved queues', () => {
+  it('saves a queue and persists it', () => {
+    const store = new SettingsStore(file)
+    expect(store.saveQueue('  Rock  ', [{ videoId: A, title: 'Song A' }])).toBe(true)
+    expect(new SettingsStore(file).get().queues).toEqual([
+      { name: 'Rock', items: [{ videoId: A, title: 'Song A' }] },
+    ])
+  })
+
+  it('overwrites an existing name keeping its position', () => {
+    const store = new SettingsStore(file)
+    store.saveQueue('One', [{ videoId: A, title: 'A' }])
+    store.saveQueue('Two', [{ videoId: A, title: 'A' }])
+    expect(store.saveQueue('One', [{ videoId: B, title: 'B' }])).toBe(true)
+    expect(store.get().queues.map((q) => q.name)).toEqual(['One', 'Two'])
+    expect(store.get().queues[0].items).toEqual([{ videoId: B, title: 'B' }])
+  })
+
+  it('rejects invalid names, empty queues and invalid items', () => {
+    const store = new SettingsStore(file)
+    expect(store.saveQueue('   ', [{ videoId: A, title: 'A' }])).toBe(false)
+    expect(store.saveQueue('x'.repeat(101), [{ videoId: A, title: 'A' }])).toBe(false)
+    expect(store.saveQueue('Empty', [])).toBe(false)
+    expect(store.saveQueue('Bad', [{ videoId: 'nope', title: 'A' }])).toBe(false)
+    expect(store.get().queues).toEqual([])
+  })
+
+  it('refuses new names beyond 50 queues but still allows overwriting', () => {
+    const store = new SettingsStore(file)
+    for (let i = 0; i < 50; i++) expect(store.saveQueue(`q${i}`, [{ videoId: A, title: 'A' }])).toBe(true)
+    expect(store.saveQueue('one-more', [{ videoId: A, title: 'A' }])).toBe(false)
+    expect(store.saveQueue('q0', [{ videoId: B, title: 'B' }])).toBe(true)
+    expect(store.get().queues).toHaveLength(50)
+  })
+
+  it('deletes a queue', () => {
+    const store = new SettingsStore(file)
+    store.saveQueue('One', [{ videoId: A, title: 'A' }])
+    store.deleteQueue('One')
+    store.deleteQueue('missing')
+    expect(new SettingsStore(file).get().queues).toEqual([])
+  })
+
+  it('drops invalid saved queues on read', () => {
+    const store = new SettingsStore(file)
+    store.setVolume(10)
+    writeFileSync(
+      file,
+      JSON.stringify({
+        queues: [
+          { name: 'Good', items: [{ videoId: A, title: 'A' }] },
+          { name: '', items: [{ videoId: A, title: 'A' }] },
+          { name: 'NoItems', items: [] },
+          { name: 'BadId', items: [{ videoId: 'x', title: 'A' }] },
+          'garbage',
+        ],
+      }),
+    )
+    expect(new SettingsStore(file).get().queues).toEqual([{ name: 'Good', items: [{ videoId: A, title: 'A' }] }])
+  })
+
+  it('get returns deep copies', () => {
+    const store = new SettingsStore(file)
+    store.saveQueue('One', [{ videoId: A, title: 'A' }])
+    const copy = store.get()
+    copy.queues[0].items[0].title = 'hacked'
+    copy.queues.pop()
+    expect(store.get().queues[0].items[0].title).toBe('A')
   })
 })

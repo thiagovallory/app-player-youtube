@@ -53,6 +53,7 @@ export interface Settings {
   display?: SavedDisplay
   volume: number
   history: string[]
+  queues: SavedQueue[]
 }
 
 export interface QueueVideo {
