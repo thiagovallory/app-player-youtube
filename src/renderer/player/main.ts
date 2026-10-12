@@ -119,4 +119,7 @@ setInterval(() => {
 window.onYouTubeIframeAPIReady = build
 const script = document.createElement('script')
 script.src = 'https://www.youtube.com/iframe_api'
+script.onerror = () => {
+  report({ status: 'error', error: 'Não foi possível carregar o player do YouTube (sem internet?).' })
+}
 document.head.append(script)
