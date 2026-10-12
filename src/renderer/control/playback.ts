@@ -1,5 +1,6 @@
 import { parseYoutubeUrl } from '../../shared/parseYoutubeUrl'
 import type { PlayerState } from '../../shared/types'
+import { getCurrentUid } from './queue'
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 
@@ -64,9 +65,11 @@ export async function initPlayback(): Promise<void> {
   url.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') submit(false)
   })
-  toggle.addEventListener('click', () =>
-    window.control.sendCommand({ type: status === 'playing' ? 'pause' : 'play' }),
-  )
+  toggle.addEventListener('click', () => {
+    const uid = getCurrentUid()
+    if (uid && (status === 'idle' || status === 'ended')) window.control.queuePlayAt(uid)
+    else window.control.sendCommand({ type: status === 'playing' ? 'pause' : 'play' })
+  })
   byId('prev').addEventListener('click', () => window.control.sendCommand({ type: 'prev' }))
   byId('next').addEventListener('click', () => window.control.sendCommand({ type: 'next' }))
   byId('stop').addEventListener('click', () => window.control.sendCommand({ type: 'stop' }))
