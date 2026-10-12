@@ -1,4 +1,4 @@
-import type { DisplaysSnapshot, PlayerCommand, PlayerState, Settings } from './types'
+import type { DisplaysSnapshot, PlayerCommand, PlayerState, ProbeResult, Settings } from './types'
 
 export type Unsubscribe = () => void
 
@@ -17,4 +17,8 @@ export interface PlayerApi {
   ready(): void
   report(state: PlayerState): void
   onCommand(cb: (cmd: PlayerCommand) => void): Unsubscribe
+}
+
+export interface ProbeApi {
+  report(result: ProbeResult): void
 }

@@ -4,6 +4,7 @@ export type YoutubeTarget =
 
 export type PlayerCommand =
   | { type: 'load'; target: YoutubeTarget; url: string }
+  | { type: 'play-video'; videoId: string }
   | { type: 'play' }
   | { type: 'pause' }
   | { type: 'next' }
@@ -20,6 +21,7 @@ export interface PlayerState {
   currentTime: number
   duration: number
   error?: string
+  skip?: boolean
 }
 
 export const IDLE_STATE: PlayerState = { status: 'idle', title: '', currentTime: 0, duration: 0 }
@@ -52,3 +54,26 @@ export interface Settings {
   volume: number
   history: string[]
 }
+
+export interface QueueVideo {
+  videoId: string
+  title: string
+}
+
+export interface QueueItem extends QueueVideo {
+  uid: string
+}
+
+export interface SavedQueue {
+  name: string
+  items: QueueVideo[]
+}
+
+export interface QueueState {
+  items: QueueItem[]
+  currentUid: string | null
+  expanding: boolean
+  saved: string[]
+}
+
+export type ProbeResult = { ok: true; ids: string[] } | { ok: false; error: string }
