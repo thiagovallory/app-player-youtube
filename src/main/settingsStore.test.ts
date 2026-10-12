@@ -1,7 +1,7 @@
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SettingsStore } from './settingsStore'
 
 let file: string
@@ -49,6 +49,17 @@ describe('SettingsStore', () => {
     expect(history).toHaveLength(10)
     expect(history[0]).toBe('url-5')
     expect(history.filter((h) => h === 'url-5')).toHaveLength(1)
+  })
+
+  it('keeps in-memory state and does not throw when the file cannot be written', () => {
+    const blocker = join(mkdtempSync(join(tmpdir(), 'settings-')), 'blocker')
+    writeFileSync(blocker, 'i am a file')
+    const store = new SettingsStore(join(blocker, 'settings.json'))
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    expect(() => store.setVolume(30)).not.toThrow()
+    expect(store.get().volume).toBe(30)
+    expect(errors).toHaveBeenCalled()
+    errors.mockRestore()
   })
 
   it('falls back to defaults on corrupt JSON', () => {

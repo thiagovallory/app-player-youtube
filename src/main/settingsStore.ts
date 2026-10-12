@@ -108,7 +108,11 @@ export class SettingsStore {
   }
 
   private save(): void {
-    mkdirSync(dirname(this.file), { recursive: true })
-    writeFileSync(this.file, JSON.stringify(this.data, null, 2))
+    try {
+      mkdirSync(dirname(this.file), { recursive: true })
+      writeFileSync(this.file, JSON.stringify(this.data, null, 2))
+    } catch (err) {
+      console.error('Failed to save settings', err)
+    }
   }
 }
