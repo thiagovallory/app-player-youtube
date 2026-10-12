@@ -1,5 +1,6 @@
 import type { QueueItem, QueueState } from '../../shared/types'
 import type { LoadMode } from '../../shared/validate'
+import { icon, type IconName } from './icons'
 import { CLOSE_MENU_EVENT } from './menu'
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
@@ -12,6 +13,7 @@ export async function initQueue(): Promise<void> {
   const list = byId<HTMLUListElement>('queue')
   const empty = byId<HTMLElement>('queue-empty')
   const status = byId<HTMLElement>('queue-status')
+  const count = byId<HTMLElement>('queue-count')
   const clear = byId<HTMLButtonElement>('queue-clear')
   const nameInput = byId<HTMLInputElement>('queue-name')
   const save = byId<HTMLButtonElement>('queue-save')
@@ -22,14 +24,19 @@ export async function initQueue(): Promise<void> {
   let pushed = false
   let state: QueueState = { items: [], currentUid: null, expanding: false, saved: [] }
 
-  const row = (item: QueueItem, index: number): HTMLLIElement => {
+  const row = (item: QueueItem, position: number): HTMLLIElement => {
     const li = document.createElement('li')
     li.draggable = true
     li.classList.toggle('current', item.uid === state.currentUid)
 
     const handle = document.createElement('span')
     handle.className = 'handle'
-    handle.textContent = '⠿'
+    handle.append(icon('grip'))
+
+    const index = document.createElement('span')
+    index.className = 'queue-index'
+    if (li.classList.contains('current')) index.append(icon('bars'))
+    else index.textContent = String(position + 1)
 
     const title = document.createElement('button')
     title.type = 'button'
@@ -41,11 +48,12 @@ export async function initQueue(): Promise<void> {
     const remove = document.createElement('button')
     remove.type = 'button'
     remove.className = 'queue-remove'
-    remove.textContent = '✕'
+    remove.append(icon('x'))
     remove.setAttribute('aria-label', `Remover ${item.title}`)
+    remove.title = 'Remover da fila'
     remove.addEventListener('click', () => window.control.queueRemove(item.uid))
 
-    li.append(handle, title, remove)
+    li.append(index, title, handle, remove)
 
     li.addEventListener('dragstart', (e) => {
       dragUid = item.uid
@@ -66,7 +74,7 @@ export async function initQueue(): Promise<void> {
     li.addEventListener('drop', (e) => {
       e.preventDefault()
       li.classList.remove('drop-target')
-      if (dragUid && dragUid !== item.uid) window.control.queueMove(dragUid, index)
+      if (dragUid && dragUid !== item.uid) window.control.queueMove(dragUid, position)
       dragUid = null
     })
     li.addEventListener('dragend', () => {
@@ -83,12 +91,13 @@ export async function initQueue(): Promise<void> {
     label.textContent = name
     label.title = name
 
-    const action = (className: string, text: string, onClick: () => void) => {
+    const action = (className: string, iconName: IconName, text: string, onClick: () => void) => {
       const button = document.createElement('button')
       button.type = 'button'
-      button.className = className
-      button.textContent = text
+      button.className = `icon-btn ${className}`
+      button.append(icon(iconName))
       button.setAttribute('aria-label', `${text} fila ${name}`)
+      button.title = `${text} fila ${name}`
       button.addEventListener('click', onClick)
       return button
     }
@@ -99,9 +108,9 @@ export async function initQueue(): Promise<void> {
 
     li.append(
       label,
-      action('saved-append', 'Adicionar', load('append')),
-      action('saved-replace', 'Substituir', load('replace')),
-      action('saved-delete', 'Excluir', () => {
+      action('saved-append', 'list-plus', 'Adicionar', load('append')),
+      action('saved-replace', 'replace', 'Substituir', load('replace')),
+      action('saved-delete', 'trash', 'Excluir', () => {
         if (confirm(`Excluir a fila "${name}"?`)) window.control.queueDeleteSaved(name)
       }),
     )
@@ -111,7 +120,9 @@ export async function initQueue(): Promise<void> {
   const render = (next: QueueState) => {
     state = next
     currentUid = next.currentUid
-    empty.hidden = next.items.length > 0
+    const n = next.items.length
+    count.textContent = n === 0 ? 'Fila' : `Fila · ${n} ${n === 1 ? 'item' : 'itens'}`
+    empty.hidden = n > 0
     status.hidden = !next.expanding
     clear.disabled = next.items.length === 0
     save.disabled = next.items.length === 0
