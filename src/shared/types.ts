@@ -21,6 +21,7 @@ export interface PlayerState {
   duration: number
   error?: string
   skip?: boolean
+  videoId?: string
 }
 
 export const IDLE_STATE: PlayerState = { status: 'idle', title: '', currentTime: 0, duration: 0 }

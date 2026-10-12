@@ -16,6 +16,7 @@ export interface QueueManagerDeps {
   }
   publish(state: QueueState): void
   notify(message: string): void
+  isPlayerOpen(): boolean
 }
 
 export class QueueManager {
@@ -46,7 +47,13 @@ export class QueueManager {
   }
 
   remove(uid: string): void {
-    this.apply(this.queue.remove(uid))
+    const wasCurrent = this.queue.snapshot().currentUid === uid
+    const action = this.queue.remove(uid)
+    if (wasCurrent && !this.deps.isPlayerOpen()) {
+      this.publish()
+      return
+    }
+    this.apply(action)
   }
 
   move(uid: string, toIndex: number): void {
@@ -85,6 +92,7 @@ export class QueueManager {
       return
     }
     this.apply(this.queue.replace(saved.items))
+    this.fetchTitlesFor(saved.items.filter((i) => i.title === i.videoId).map((i) => i.videoId))
   }
 
   deleteSaved(name: string): void {
@@ -93,16 +101,27 @@ export class QueueManager {
   }
 
   onPlayerState(state: PlayerState): void {
+    const advancing = state.status === 'ended' || (state.status === 'error' && state.skip === true)
+    if (advancing && state.videoId !== undefined && state.videoId !== this.currentVideoId()) return
     const previous = this.lastStatus
     this.lastStatus = state.status
     const ended = state.status === 'ended' && previous !== 'ended'
     const skip = state.status === 'error' && state.skip === true && previous !== 'error'
-    if (skip) this.deps.notify(`Pulando vídeo: ${state.error ?? 'erro desconhecido'}`)
-    if (ended || skip) this.apply(this.queue.next(true))
+    if (!ended && !skip) return
+    const action = this.queue.next(true)
+    if (skip && action && 'play' in action) {
+      this.deps.notify(`Pulando vídeo: ${state.error ?? 'erro desconhecido'}`)
+    }
+    this.apply(action)
   }
 
   async settled(): Promise<void> {
     while (this.titleJobs.size > 0) await Promise.allSettled([...this.titleJobs])
+  }
+
+  private currentVideoId(): string | undefined {
+    const { items, currentUid } = this.queue.snapshot()
+    return items.find((i) => i.uid === currentUid)?.videoId
   }
 
   private async doAdd(url: string, playNow: boolean): Promise<void> {

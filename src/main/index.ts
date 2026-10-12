@@ -81,6 +81,7 @@ async function main(): Promise<void> {
     },
     publish: (state) => toControl(QUEUE_STATE, state),
     notify: (message) => toControl(NOTICE, message),
+    isPlayerOpen: () => controller.isOpen(),
   })
 
   ipcMain.handle(DISPLAYS_LIST, () => snapshot())
@@ -133,6 +134,7 @@ async function main(): Promise<void> {
 
   ipcMain.on(CMD_FROM_CONTROL, (event, cmd: PlayerCommand) => {
     if (!isControl(event.sender)) return
+    if (typeof cmd !== 'object' || cmd === null || typeof cmd.type !== 'string') return
     switch (cmd.type) {
       case 'next':
         manager.next()
@@ -143,8 +145,10 @@ async function main(): Promise<void> {
       case 'play-video':
         return
       case 'volume':
+        if (typeof cmd.value !== 'number' || !Number.isFinite(cmd.value)) return
         store.setVolume(cmd.value)
-        break
+        controller.send({ type: 'volume', value: store.get().volume }, target())
+        return
       case 'seek':
         if (!Number.isFinite(cmd.seconds)) return
         break

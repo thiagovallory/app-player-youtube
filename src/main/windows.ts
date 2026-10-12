@@ -123,6 +123,6 @@ export function createProbeWindow(baseUrl: string, listId: string): BrowserWindo
     webPreferences: { ...webPreferences("probe"), backgroundThrottling: false },
   });
   lockDown(win);
-  void win.loadURL(`${baseUrl}/probe/index.html#${listId}`);
+  win.loadURL(`${baseUrl}/probe/index.html#${listId}`).catch(() => {});
   return win;
 }

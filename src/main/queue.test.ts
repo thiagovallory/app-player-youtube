@@ -11,6 +11,15 @@ function make() {
 const ids = (q: PlaybackQueue) => q.snapshot().items.map((i) => i.videoId)
 
 describe('add', () => {
+  it('starts the first added item when nothing is current (after removing the last current item)', () => {
+    const q = make()
+    q.add([v('a'), v('b')])
+    q.next()
+    q.remove('u2')
+    expect(q.snapshot().currentUid).toBeNull()
+    expect(q.add([v('c')])).toEqual({ play: { uid: 'u3', videoId: 'c', title: 'c' } })
+  })
+
   it('plays the first added item when the queue was empty', () => {
     const q = make()
     const action = q.add([v('a'), v('b')])

@@ -17,7 +17,7 @@ export class PlaybackQueue {
   add(videos: QueueVideo[]): QueueAction {
     if (videos.length === 0) return null
     const created = this.make(videos)
-    const startFresh = this.items.length === 0 || this.atEnd
+    const startFresh = this.items.length === 0 || this.atEnd || this.currentUid === null
     this.items.push(...created)
     return startFresh ? this.play(created[0]) : null
   }

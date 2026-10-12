@@ -67,7 +67,7 @@ export async function initPlayback(): Promise<void> {
   })
   toggle.addEventListener('click', () => {
     const uid = getCurrentUid()
-    if (uid && (status === 'idle' || status === 'ended')) window.control.queuePlayAt(uid)
+    if (uid && (status === 'idle' || status === 'ended' || status === 'error')) window.control.queuePlayAt(uid)
     else window.control.sendCommand({ type: status === 'playing' ? 'pause' : 'play' })
   })
   byId('prev').addEventListener('click', () => window.control.sendCommand({ type: 'prev' }))
