@@ -15,11 +15,20 @@ export function initMenu(): void {
   const isOpen = () => !panel.hidden
 
   toggle.addEventListener('click', () => setOpen(!isOpen()))
-  document.addEventListener('click', (e) => {
-    if (!isOpen()) return
-    const target = e.target as Node
-    if (!panel.contains(target) && !toggle.contains(target)) setOpen(false)
-  })
+  // Com o menu aberto, o clique fora só fecha o menu: é interceptado na fase de captura
+  // para não acionar o botão ou item que estiver embaixo.
+  document.addEventListener(
+    'click',
+    (e) => {
+      if (!isOpen()) return
+      const target = e.target as Node
+      if (panel.contains(target) || toggle.contains(target)) return
+      e.preventDefault()
+      e.stopPropagation()
+      setOpen(false)
+    },
+    true,
+  )
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen()) {
       setOpen(false)
