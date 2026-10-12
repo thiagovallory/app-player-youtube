@@ -1,5 +1,6 @@
 import { parseYoutubeUrl } from '../../shared/parseYoutubeUrl'
 import type { PlayerState } from '../../shared/types'
+import { icon } from './icons'
 import { getCurrentUid } from './queue'
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
@@ -16,6 +17,12 @@ const STATUS_TEXT: Record<PlayerState['status'], string> = {
 function format(seconds: number): string {
   const total = Math.max(0, Math.floor(seconds))
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}
+
+function setFill(input: HTMLInputElement): void {
+  const max = Number(input.max)
+  const pct = max > 0 ? (Number(input.value) / max) * 100 : 0
+  input.style.setProperty('--fill', `${Math.min(100, Math.max(0, pct))}%`)
 }
 
 export async function initPlayback(): Promise<void> {
@@ -41,6 +48,7 @@ export async function initPlayback(): Promise<void> {
 
   const settings = await window.control.getSettings()
   volume.value = String(settings.volume)
+  setFill(volume)
   settings.history.forEach((h) => history.append(Object.assign(document.createElement('option'), { value: h })))
 
   let seeking = false
@@ -73,12 +81,14 @@ export async function initPlayback(): Promise<void> {
   byId('prev').addEventListener('click', () => window.control.sendCommand({ type: 'prev' }))
   byId('next').addEventListener('click', () => window.control.sendCommand({ type: 'next' }))
   byId('stop').addEventListener('click', () => window.control.sendCommand({ type: 'stop' }))
-  volume.addEventListener('input', () =>
-    window.control.sendCommand({ type: 'volume', value: Number(volume.value) }),
-  )
+  volume.addEventListener('input', () => {
+    setFill(volume)
+    window.control.sendCommand({ type: 'volume', value: Number(volume.value) })
+  })
   seek.addEventListener('input', () => {
     seeking = true
     time.textContent = format(Number(seek.value))
+    setFill(seek)
   })
   seek.addEventListener('change', () => {
     seeking = false
@@ -88,16 +98,21 @@ export async function initPlayback(): Promise<void> {
   window.control.onState((s) => {
     status = s.status
     title.textContent = s.title || 'Nada tocando'
+    title.title = title.textContent
     statusEl.textContent = STATUS_TEXT[s.status]
     playerError.textContent = s.error ?? ''
     playerError.hidden = !s.error
-    toggle.textContent = s.status === 'playing' ? '⏸' : '▶'
+    const playing = s.status === 'playing'
+    toggle.replaceChildren(icon(playing ? 'pause' : 'play'))
+    toggle.setAttribute('aria-label', playing ? 'Pausar' : 'Tocar')
+    toggle.title = playing ? 'Pausar' : 'Tocar'
     seek.max = String(Math.floor(s.duration))
     duration.textContent = format(s.duration)
     if (!seeking) {
       seek.value = String(Math.floor(s.currentTime))
       time.textContent = format(s.currentTime)
     }
+    setFill(seek)
   })
 
   window.control.onNotice((message) => {
