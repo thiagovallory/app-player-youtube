@@ -22,6 +22,19 @@ npm test           # testes unitários
    - **Filas salvas**: **Adicionar** acrescenta os itens ao fim da fila atual (sem tocar), **Substituir** troca a fila atual, seleciona o primeiro item e para o player (sem tocar) e **Excluir** apaga a fila salva. A fila ativa não é restaurada ao abrir o app.
 5. Use play/pause, anterior/próximo, seek e volume. **Parar** fecha o player e mantém a fila.
 
+## Gerar executáveis
+
+Os arquivos saem em `dist/` (fora do git).
+
+```bash
+npm run dist:mac   # macOS: .zip com o Player YouTube.app (arm64 e x64)
+npm run dist:win   # Windows: .exe portátil (rodar num PC Windows)
+```
+
+- **macOS:** descompacte o `.zip` e execute o app, sem instalar. Ele não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia: clique com o botão direito no app > Abrir > Abrir, ou libere em Ajustes do Sistema > Privacidade e Segurança. Se aparecer "danificado", rode `xattr -dr com.apple.quarantine "Player YouTube.app"`.
+- **Windows:** o `.exe` portátil roda direto, sem instalar. O SmartScreen mostra "O Windows protegeu seu PC": clique em "Mais informações" > "Executar assim mesmo". Gere o `.exe` num PC Windows (`npm install` e `npm run dist:win`); a partir do Mac o build exige Wine e não é suportado aqui.
+- Sem certificado pago não há assinatura nem notarização; o app funciona igual depois dos avisos da primeira abertura.
+
 ## Limitações
 
 - Anúncios do YouTube aparecem (limite da IFrame API).

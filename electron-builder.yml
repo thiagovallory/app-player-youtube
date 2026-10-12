@@ -1,0 +1,23 @@
+appId: com.thiagonunes.player-youtube
+productName: Player YouTube
+directories:
+  output: dist
+files:
+  - out/**
+  - package.json
+mac:
+  category: public.app-category.video
+  identity: "-"
+  hardenedRuntime: false
+  target:
+    - target: zip
+      arch:
+        - arm64
+        - x64
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-win-portable.${ext}
