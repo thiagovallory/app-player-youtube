@@ -91,11 +91,12 @@ export async function initQueue(): Promise<void> {
     label.textContent = name
     label.title = name
 
-    const action = (className: string, iconName: IconName, text: string, onClick: () => void) => {
+    const action = (className: string, iconName: IconName, text: string, onClick: () => void, showLabel = false) => {
       const button = document.createElement('button')
       button.type = 'button'
-      button.className = `icon-btn ${className}`
+      button.className = `${showLabel ? 'btn' : 'icon-btn'} ${className}`
       button.append(icon(iconName))
+      if (showLabel) button.append(text)
       button.setAttribute('aria-label', `${text} fila ${name}`)
       button.title = `${text} fila ${name}`
       button.addEventListener('click', onClick)
@@ -106,14 +107,16 @@ export async function initQueue(): Promise<void> {
       document.dispatchEvent(new CustomEvent(CLOSE_MENU_EVENT))
     }
 
-    li.append(
-      label,
-      action('saved-append', 'list-plus', 'Adicionar', load('append')),
-      action('saved-replace', 'replace', 'Substituir', load('replace')),
+    const actions = document.createElement('div')
+    actions.className = 'saved-actions'
+    actions.append(
+      action('saved-append', 'list-plus', 'Adicionar', load('append'), true),
+      action('saved-replace', 'replace', 'Substituir', load('replace'), true),
       action('saved-delete', 'trash', 'Excluir', () => {
         if (confirm(`Excluir a fila "${name}"?`)) window.control.queueDeleteSaved(name)
       }),
     )
+    li.append(label, actions)
     return li
   }
 
