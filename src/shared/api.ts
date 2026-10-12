@@ -1,3 +1,4 @@
+import type { LoadMode } from './validate'
 import type { DisplaysSnapshot, PlayerCommand, PlayerState, ProbeResult, QueueState, Settings } from './types'
 
 export type Unsubscribe = () => void
@@ -15,7 +16,7 @@ export interface ControlApi {
   queueClear(): void
   queuePlayAt(uid: string): void
   queueSave(name: string): void
-  queueLoadSaved(name: string): void
+  queueLoadSaved(name: string, mode: LoadMode): void
   queueDeleteSaved(name: string): void
   onState(cb: (state: PlayerState) => void): Unsubscribe
   onQueueState(cb: (state: QueueState) => void): Unsubscribe

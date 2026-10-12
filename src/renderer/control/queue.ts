@@ -108,7 +108,7 @@ export async function initQueue(): Promise<void> {
     if (e.key === 'Enter') saveCurrent()
   })
   load.addEventListener('click', () => {
-    if (saved.value) window.control.queueLoadSaved(saved.value)
+    if (saved.value) window.control.queueLoadSaved(saved.value, 'replace')
   })
   del.addEventListener('click', () => {
     if (saved.value && confirm(`Excluir a fila "${saved.value}"?`)) window.control.queueDeleteSaved(saved.value)

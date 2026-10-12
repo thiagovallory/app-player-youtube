@@ -1,6 +1,6 @@
 import { parseYoutubeUrl } from '../shared/parseYoutubeUrl'
 import type { PlayerState, PlayerStatus, QueueState, QueueVideo, SavedQueue } from '../shared/types'
-import { MAX_QUEUE_ITEMS, isVideoId } from '../shared/validate'
+import { MAX_QUEUE_ITEMS, isVideoId, type LoadMode } from '../shared/validate'
 import { PlaybackQueue, type QueueAction } from './queue'
 
 export interface QueueManagerDeps {
@@ -87,7 +87,7 @@ export class QueueManager {
     this.publish()
   }
 
-  loadSaved(name: string, mode: 'append' | 'replace'): Promise<void> {
+  loadSaved(name: string, mode: LoadMode): Promise<void> {
     const job = this.chain.then(() => this.doLoadSaved(name, mode))
     this.chain = job.catch(() => undefined)
     return job
@@ -174,7 +174,7 @@ export class QueueManager {
     this.fetchTitlesFor(videos.map((v) => v.videoId))
   }
 
-  private async doLoadSaved(name: string, mode: 'append' | 'replace'): Promise<void> {
+  private async doLoadSaved(name: string, mode: LoadMode): Promise<void> {
     const saved = this.deps.saved.list().find((q) => q.name === name)
     if (!saved) {
       this.deps.notify('Fila salva não encontrada.')

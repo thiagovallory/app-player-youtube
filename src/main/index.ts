@@ -23,7 +23,7 @@ import {
   STATE_TO_CONTROL,
 } from '../shared/ipc'
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
-import { isMoveIndex, isUid, isUrlText, parseQueueName } from '../shared/validate'
+import { isLoadMode, isMoveIndex, isUid, isUrlText, parseQueueName } from '../shared/validate'
 import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
 import { fetchTitles } from './oembed'
 import { PlayerController, type PlayerTarget } from './playerController'
@@ -143,10 +143,11 @@ async function main(): Promise<void> {
     if (clean) manager.save(clean)
     else toControl(NOTICE, 'Nome de fila inválido (use de 1 a 100 caracteres).')
   })
-  ipcMain.on(QUEUE_LOAD_SAVED, (event, name: unknown) => {
+  ipcMain.on(QUEUE_LOAD_SAVED, (event, payload: unknown) => {
     if (!isControl(event.sender)) return
+    const { name, mode } = (payload ?? {}) as { name?: unknown; mode?: unknown }
     const clean = parseQueueName(name)
-    if (clean) manager.loadSaved(clean, 'replace').catch((err) => toControl(NOTICE, String(err)))
+    if (clean && isLoadMode(mode)) manager.loadSaved(clean, mode).catch((err) => toControl(NOTICE, String(err)))
   })
   ipcMain.on(QUEUE_DELETE_SAVED, (event, name: unknown) => {
     if (!isControl(event.sender)) return

@@ -24,3 +24,7 @@ export const isMoveIndex = (v: unknown, length: number): v is number =>
 
 export const isUrlText = (v: unknown): v is string =>
   typeof v === 'string' && v.length > 0 && v.length <= MAX_URL_LENGTH
+
+export type LoadMode = 'append' | 'replace'
+
+export const isLoadMode = (v: unknown): v is LoadMode => v === 'append' || v === 'replace'
