@@ -8,25 +8,41 @@
   </head>
   <body>
     <main>
-      <section>
-        <label for="url">Link do YouTube (vídeo ou playlist)</label>
-        <div class="row">
-          <input id="url" type="text" list="history" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+      <header class="top">
+        <div class="row wrap">
+          <button id="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu-panel">☰</button>
+          <input id="url" type="text" list="history" aria-label="Link do YouTube (vídeo ou playlist)" placeholder="Link do YouTube (vídeo ou playlist)" autocomplete="off" />
           <datalist id="history"></datalist>
           <button id="add-url" type="button">Adicionar à fila</button>
           <button id="play-now" type="button">Tocar agora</button>
         </div>
         <p id="url-error" class="error" hidden></p>
-      </section>
 
-      <section>
-        <label for="display">Monitor de reprodução</label>
-        <div class="row">
-          <select id="display"></select>
-          <button id="identify" type="button">Identificar</button>
+        <div id="menu-panel" class="menu" role="dialog" aria-label="Menu" hidden>
+          <section>
+            <label for="display">Monitor de reprodução</label>
+            <div class="row">
+              <select id="display"></select>
+              <button id="identify" type="button">Identificar</button>
+            </div>
+            <p id="single-warning" class="warn" hidden>Só um monitor detectado — o player abrirá em janela comum.</p>
+          </section>
+
+          <section>
+            <label for="queue-name">Salvar fila</label>
+            <div class="row">
+              <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />
+              <button id="queue-save" type="button">Salvar</button>
+            </div>
+          </section>
+
+          <section>
+            <span class="label">Filas salvas</span>
+            <p id="saved-empty" class="muted">Nenhuma fila salva.</p>
+            <ul id="saved-list" aria-label="Filas salvas"></ul>
+          </section>
         </div>
-        <p id="single-warning" class="warn" hidden>Só um monitor detectado — o player abrirá em janela comum.</p>
-      </section>
+      </header>
 
       <section class="now">
         <h1 id="title">Nada tocando</h1>
@@ -34,14 +50,13 @@
         <p id="player-error" class="error" hidden></p>
         <input id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="Posição" />
         <div class="times"><span id="time">0:00</span><span id="duration">0:00</span></div>
-        <div class="row center">
+        <div class="row controls">
           <button id="prev" type="button" aria-label="Anterior">⏮</button>
           <button id="toggle" type="button" aria-label="Tocar ou pausar">▶</button>
           <button id="next" type="button" aria-label="Próximo">⏭</button>
           <button id="stop" type="button" aria-label="Parar e fechar o player">Parar</button>
+          <input id="volume" type="range" min="0" max="100" step="1" value="100" aria-label="Volume" />
         </div>
-        <label for="volume">Volume</label>
-        <input id="volume" type="range" min="0" max="100" step="1" value="100" />
       </section>
 
       <section class="queue">
@@ -52,20 +67,6 @@
         <p id="queue-status" class="muted" hidden>Carregando playlist…</p>
         <p id="queue-empty" class="muted">A fila está vazia. Adicione um link acima.</p>
         <ul id="queue" aria-label="Fila de reprodução"></ul>
-      </section>
-
-      <section>
-        <label for="queue-name">Salvar fila</label>
-        <div class="row">
-          <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />
-          <button id="queue-save" type="button">Salvar</button>
-        </div>
-        <label for="saved-queues">Filas salvas</label>
-        <div class="row">
-          <select id="saved-queues"></select>
-          <button id="saved-load" type="button">Carregar</button>
-          <button id="saved-delete" type="button">Excluir</button>
-        </div>
       </section>
 
       <p id="notice" class="warn" hidden></p>
