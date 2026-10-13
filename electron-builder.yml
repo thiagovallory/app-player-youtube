@@ -1,5 +1,6 @@
 appId: com.thiagonunes.player-youtube
 productName: Player YouTube
+compression: maximum
 directories:
   output: dist
 files:
@@ -9,6 +10,9 @@ mac:
   category: public.app-category.video
   identity: "-"
   hardenedRuntime: false
+  electronLanguages:
+    - pt_BR
+    - en
   target:
     - target: zip
       arch:
@@ -16,6 +20,9 @@ mac:
         - x64
   artifactName: ${productName}-${version}-mac-${arch}.${ext}
 win:
+  electronLanguages:
+    - pt-BR
+    - en-US
   target:
     - target: portable
       arch:
