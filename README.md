@@ -28,7 +28,8 @@ Os arquivos saem em `dist/` (fora do git).
 
 ```bash
 npm run dist:mac   # macOS: .zip com o Player YouTube.app (arm64 e x64)
-npm run dist:win   # Windows: instaladores x64 e arm64 + .exe portátil x64
+npm run dist:win   # Windows 10/11: instaladores x64 e arm64 + .exe portátil x64
+npm run dist:win-legacy   # Windows 7/8/8.1 (e 10/11 de 32 bits): instaladores x64 e 32 bits (Electron 22)
 ```
 
 - **macOS:** descompacte o `.zip` e execute o app, sem instalar. Ele não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia: clique com o botão direito no app > Abrir > Abrir, ou libere em Ajustes do Sistema > Privacidade e Segurança. Se aparecer "danificado", rode `xattr -dr com.apple.quarantine "Player YouTube.app"`.
@@ -37,7 +38,8 @@ npm run dist:win   # Windows: instaladores x64 e arm64 + .exe portátil x64
   - `...-win-arm64-setup.exe`: instalador para Windows no ARM.
   - `...-win-x64-portable.exe`: roda direto, sem instalar (abre mais devagar, pois se descompacta a cada abertura).
   - O SmartScreen mostra "O Windows protegeu seu PC": clique em "Mais informações" > "Executar assim mesmo".
-  - Windows de 32 bits não é suportado (o Electron 44 não publica essa versão).
+  - Windows de 32 bits não é suportado por esta versão (o Electron 44 não publica essa versão).
+- **Windows 7, 8, 8.1 e Windows de 32 bits (versão "legado"):** `...-win7-x64-setup.exe` e `...-win7-ia32-setup.exe` (Electron 22, o último com esse suporte). Eles também funcionam no Windows 10/11, mas use os instaladores normais lá. Limitações: o Electron 22 não recebe mais correções de segurança e o Chromium dele é antigo, então o YouTube pode deixar de funcionar nele a qualquer momento. No Windows 7 instale antes as atualizações do sistema (SP1 e as de segurança). Esses instaladores foram verificados no Electron 22 (macOS) e não em um Windows 7/8 real.
 - Sem certificado pago não há assinatura nem notarização; o app funciona igual depois dos avisos da primeira abertura. O build do Windows também pode ser gerado neste Mac.
 
 ## Limitações

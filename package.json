@@ -12,7 +12,8 @@
     "test": "vitest run",
     "dist": "npm run build && electron-builder --mac --win",
     "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win"
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:win-legacy": "npm run build && electron-builder --win nsis --x64 --ia32 --config electron-builder.legacy.yml"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

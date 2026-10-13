@@ -27,11 +27,12 @@ function inlineSharedPerPreload(): Plugin {
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
-    build: { rollupOptions: { input: { index: resolve('src/main/index.ts') } } },
+    build: { target: 'node16', rollupOptions: { input: { index: resolve('src/main/index.ts') } } },
   },
   preload: {
     plugins: [externalizeDepsPlugin(), inlineSharedPerPreload()],
     build: {
+      target: 'node16',
       rollupOptions: {
         input: {
           control: resolve('src/preload/control.ts'),
@@ -44,6 +45,7 @@ export default defineConfig({
   renderer: {
     root: 'src/renderer',
     build: {
+      target: 'chrome108',
       rollupOptions: {
         input: {
           control: resolve('src/renderer/control/index.html'),
