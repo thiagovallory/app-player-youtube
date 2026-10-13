@@ -23,8 +23,22 @@ win:
   electronLanguages:
     - pt-BR
     - en-US
+  requestedExecutionLevel: asInvoker
   target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
     - target: portable
       arch:
         - x64
-  artifactName: ${productName}-${version}-win-portable.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Player YouTube
+  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
+portable:
+  artifactName: ${productName}-${version}-win-${arch}-portable.${ext}

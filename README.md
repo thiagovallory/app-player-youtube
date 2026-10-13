@@ -28,12 +28,17 @@ Os arquivos saem em `dist/` (fora do git).
 
 ```bash
 npm run dist:mac   # macOS: .zip com o Player YouTube.app (arm64 e x64)
-npm run dist:win   # Windows: .exe portátil (rodar num PC Windows)
+npm run dist:win   # Windows: instaladores x64 e arm64 + .exe portátil x64
 ```
 
 - **macOS:** descompacte o `.zip` e execute o app, sem instalar. Ele não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia: clique com o botão direito no app > Abrir > Abrir, ou libere em Ajustes do Sistema > Privacidade e Segurança. Se aparecer "danificado", rode `xattr -dr com.apple.quarantine "Player YouTube.app"`.
-- **Windows:** o `.exe` portátil roda direto, sem instalar. O SmartScreen mostra "O Windows protegeu seu PC": clique em "Mais informações" > "Executar assim mesmo". Gere o `.exe` num PC Windows (`npm install` e `npm run dist:win`); a partir do Mac o build exige Wine e não é suportado aqui.
-- Sem certificado pago não há assinatura nem notarização; o app funciona igual depois dos avisos da primeira abertura.
+- **Windows (Windows 10 ou 11):**
+  - `...-win-x64-setup.exe`: instalador para PCs comuns (64 bits). Instala só para o usuário, sem pedir administrador, e cria atalhos e desinstalador.
+  - `...-win-arm64-setup.exe`: instalador para Windows no ARM.
+  - `...-win-x64-portable.exe`: roda direto, sem instalar (abre mais devagar, pois se descompacta a cada abertura).
+  - O SmartScreen mostra "O Windows protegeu seu PC": clique em "Mais informações" > "Executar assim mesmo".
+  - Windows de 32 bits não é suportado (o Electron 44 não publica essa versão).
+- Sem certificado pago não há assinatura nem notarização; o app funciona igual depois dos avisos da primeira abertura. O build do Windows também pode ser gerado neste Mac.
 
 ## Limitações
 
