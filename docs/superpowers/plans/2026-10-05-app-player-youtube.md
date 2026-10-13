@@ -67,7 +67,7 @@ Testes ao lado do código: `src/**/*.test.ts`.
 - [ ] **Step 1: Inicializar git e package.json**
 
 ```bash
-cd /Users/thiagonunes/github/app-player-youtube
+cd app-player-youtube
 git init
 ```
 
