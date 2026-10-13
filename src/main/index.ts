@@ -25,6 +25,7 @@ import {
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
 import { isLoadMode, isMoveIndex, isUid, isUrlText, parseQueueName } from '../shared/validate'
 import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
+import { createFetch } from './electronFetch'
 import { fetchTitles } from './oembed'
 import { PlayerController, type PlayerTarget } from './playerController'
 import { expandPlaylist } from './playlistExpander'
@@ -71,7 +72,7 @@ async function main(): Promise<void> {
 
   manager = new QueueManager({
     expandPlaylist: (listId) => expandPlaylist(baseUrl, listId),
-    fetchTitles: (ids, onTitle) => fetchTitles(ids, onTitle, (url, init) => net.fetch(url, init)),
+    fetchTitles: (ids, onTitle) => fetchTitles(ids, onTitle, createFetch(net)),
     playVideo: (videoId, uid) => {
       controller.send({ type: 'play-video', videoId, uid }, target())
       controller.send({ type: 'volume', value: store.get().volume }, target())

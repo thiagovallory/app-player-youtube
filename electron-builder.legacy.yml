@@ -1,0 +1,20 @@
+# Variante para Windows 7, 8 e 8.1 (32 e 64 bits): usa o Electron 22, o último com esse suporte.
+extends: ./electron-builder.yml
+appId: com.thiagovallory.player-youtube.legacy
+electronVersion: 22.3.27
+directories:
+  output: dist-legacy
+win:
+  electronLanguages:
+    - pt-BR
+    - en-US
+  requestedExecutionLevel: asInvoker
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+nsis:
+  buildUniversalInstaller: false
+  shortcutName: Player YouTube
+  artifactName: ${productName}-${version}-win7-${arch}-setup.${ext}

@@ -52,7 +52,8 @@ export function startStaticServer(root: string): Promise<{ url: string; close: (
         url: `http://127.0.0.1:${port}`,
         close: () =>
           new Promise<void>((done) => {
-            server.closeAllConnections()
+            // closeAllConnections() só existe no Node 18.2+ (Electron 22 usa Node 16)
+            if ('closeAllConnections' in server) server.closeAllConnections()
             server.close(() => done())
           }),
       })
