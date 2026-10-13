@@ -23,5 +23,6 @@
     "vite": "^7.3.6",
     "vitest": "^5.0.3"
   },
-  "author": "Thiago Vallory"
+  "author": "Thiago Vallory",
+  "license": "PolyForm-Noncommercial-1.0.0"
 }

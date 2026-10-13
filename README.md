@@ -44,3 +44,7 @@ npm run dist:win   # Windows: instaladores x64 e arm64 + .exe portátil x64
 
 - Anúncios do YouTube aparecem (limite da IFrame API).
 - Alguns vídeos bloqueiam reprodução embutida; o app avisa e, em playlist, pula para o próximo.
+
+## Licença
+
+Uso **não comercial**: você pode usar, copiar e modificar o app livremente, mas **não pode vender**. Licença [PolyForm Noncommercial 1.0.0](LICENSE) (o código é público, mas não é "open source" no sentido da OSI).
