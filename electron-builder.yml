@@ -5,9 +5,11 @@ directories:
   output: dist
 files:
   - out/**
+  - build/icon.png
   - package.json
 mac:
   category: public.app-category.video
+  icon: build/icon.icns
   identity: "-"
   hardenedRuntime: false
   electronLanguages:
@@ -20,6 +22,7 @@ mac:
         - x64
   artifactName: Player-YouTube-mac-${arch}.${ext}
 win:
+  icon: build/icon.ico
   electronLanguages:
     - pt-BR
     - en-US

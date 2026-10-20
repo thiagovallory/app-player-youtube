@@ -13,13 +13,16 @@
     "dist": "npm run build && electron-builder --mac --win --publish never",
     "dist:mac": "npm run build && electron-builder --mac --publish never",
     "dist:win": "npm run build && electron-builder --win --publish never",
-    "dist:win-legacy": "npm run build && electron-builder --win nsis --x64 --ia32 --config electron-builder.legacy.yml --publish never"
+    "dist:win-legacy": "npm run build && electron-builder --win nsis --x64 --ia32 --config electron-builder.legacy.yml --publish never",
+    "icons": "node scripts/build-icons.mjs"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.6.4",
     "electron": "^44.5.1",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
+    "png2icons": "^2.0.1",
     "typescript": "^7.0.2",
     "vite": "^7.3.6",
     "vitest": "^5.0.3"

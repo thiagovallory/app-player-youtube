@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/icon.svg" alt="Logo do Player YouTube" width="128" height="128"></p>
+
 # App Player YouTube
 
 Toca vídeo/playlist do YouTube em um monitor secundário, controlado por uma janela na tela principal.

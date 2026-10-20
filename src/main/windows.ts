@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { BrowserWindow } from 'electron'
 import type { DisplayInfo } from '../shared/types'
+import { appIconPath } from './appIcon'
 
 function webPreferences(preload?: string) {
   return {
@@ -24,6 +25,7 @@ export function createControlWindow(baseUrl: string): BrowserWindow {
     minWidth: 360,
     minHeight: 480,
     title: 'Player YouTube',
+    icon: appIconPath(),
     backgroundColor: '#111111',
     webPreferences: webPreferences('control'),
   })
@@ -43,6 +45,7 @@ export function createPlayerWindow(
           width: 960,
           height: 540,
           title: 'Player',
+          icon: appIconPath(),
           backgroundColor: '#000000',
           show: false,
           webPreferences: webPreferences('player'),
