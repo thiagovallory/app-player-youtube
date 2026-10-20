@@ -3,6 +3,8 @@ export const START = '<!-- downloads:start -->'
 export const END = '<!-- downloads:end -->'
 
 const ROWS = [
+  ['macOS (Apple Silicon: M1, M2, M3…)', 'Instalar (abra o `.dmg` e arraste para Aplicativos)', 'mac-arm64.dmg'],
+  ['macOS (Intel)', 'Instalar (abra o `.dmg` e arraste para Aplicativos)', 'mac-x64.dmg'],
   ['macOS (Apple Silicon: M1, M2, M3…)', 'Executar (descompacte o `.zip`)', 'mac-arm64.zip'],
   ['macOS (Intel)', 'Executar (descompacte o `.zip`)', 'mac-x64.zip'],
   ['Windows 10/11 (64 bits)', 'Instalar', 'win-x64-setup.exe'],

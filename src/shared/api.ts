@@ -17,6 +17,7 @@ export interface ControlApi {
   queueMove(uid: string, toIndex: number): void
   queueClear(): void
   queuePlayAt(uid: string): void
+  queueCopyLink(uid: string): void
   queueSave(name: string): void
   queueLoadSaved(name: string, mode: LoadMode): void
   queueDeleteSaved(name: string): void

@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { app, dialog, ipcMain, nativeTheme, net, screen, type BrowserWindow, type WebContents } from 'electron'
+import { app, clipboard, dialog, ipcMain, Menu, nativeTheme, net, screen, type BrowserWindow, type WebContents } from 'electron'
 import {
   CMD_FROM_CONTROL,
   DISPLAYS_CHANGED,
@@ -11,6 +11,7 @@ import {
   PREFS_SET,
   QUEUE_ADD,
   QUEUE_CLEAR,
+  QUEUE_COPY_LINK,
   QUEUE_DELETE_SAVED,
   QUEUE_GET,
   QUEUE_LOAD_SAVED,
@@ -24,8 +25,10 @@ import {
   STATE_TO_CONTROL,
   WINDOW_COMPACT,
 } from '../shared/ipc'
+import { videoUrl } from '../shared/videoUrl'
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
 import { isLoadMode, isMoveIndex, isThemePref, isUid, isUrlText, parseCompactRequest, parseQueueName, parseVideoPrefsUpdate } from '../shared/validate'
+import { buildMenuTemplate } from './appMenu'
 import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
 import { createFetch } from './electronFetch'
 import { fetchTitles } from './oembed'
@@ -39,6 +42,11 @@ import { createControlWindow, identifyDisplays } from './windows'
 
 async function main(): Promise<void> {
   await app.whenReady()
+
+  if (app.isPackaged) {
+    const template = buildMenuTemplate(process.platform, app.name)
+    Menu.setApplicationMenu(template ? Menu.buildFromTemplate(template as Electron.MenuItemConstructorOptions[]) : null)
+  }
 
   const baseUrl =
     process.env['ELECTRON_RENDERER_URL'] ?? (await startStaticServer(join(__dirname, '../renderer'))).url
@@ -142,6 +150,13 @@ async function main(): Promise<void> {
   })
   ipcMain.on(QUEUE_PLAY_AT, (event, uid: unknown) => {
     if (isControl(event.sender) && isUid(uid)) manager.playAt(uid)
+  })
+  ipcMain.on(QUEUE_COPY_LINK, (event, uid: unknown) => {
+    if (!isControl(event.sender) || !isUid(uid)) return
+    const item = manager.state().items.find((i) => i.uid === uid)
+    if (!item) return
+    clipboard.writeText(videoUrl(item.videoId))
+    toControl(NOTICE, 'Link copiado.')
   })
   ipcMain.on(QUEUE_SAVE, (event, name: unknown) => {
     if (!isControl(event.sender)) return

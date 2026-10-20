@@ -6,6 +6,8 @@ const repo = 'thiagovallory/app-player-youtube'
 describe('fileNames', () => {
   it('puts the version in every installer name', () => {
     expect(fileNames('1.2.3')).toEqual([
+      'Player-YouTube-1.2.3-mac-arm64.dmg',
+      'Player-YouTube-1.2.3-mac-x64.dmg',
       'Player-YouTube-1.2.3-mac-arm64.zip',
       'Player-YouTube-1.2.3-mac-x64.zip',
       'Player-YouTube-1.2.3-win-x64-setup.exe',
