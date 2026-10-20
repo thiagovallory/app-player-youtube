@@ -7,6 +7,10 @@ import {
   isUid,
   isUrlText,
   isVideoId,
+  PLAYBACK_RATES,
+  isCaptionLang,
+  isThemePref,
+  parseVideoPrefsUpdate,
   parseQueueName,
 } from './validate'
 
@@ -84,5 +88,43 @@ describe('isLoadMode', () => {
 
   it.each(['', 'Append', 'play', 1, null, undefined, {}])('rejects %j', (value) => {
     expect(isLoadMode(value)).toBe(false)
+  })
+})
+
+describe('isThemePref', () => {
+  it('accepts only the three themes', () => {
+    for (const t of ['system', 'light', 'dark']) expect(isThemePref(t)).toBe(true)
+    for (const t of ['auto', '', null, 1, undefined]) expect(isThemePref(t)).toBe(false)
+  })
+})
+
+describe('isCaptionLang', () => {
+  it('accepts language codes', () => {
+    for (const l of ['en', 'pt-BR', 'zh-Hans', 'es-419', 'pt_BR', 'haw']) expect(isCaptionLang(l)).toBe(true)
+  })
+  it('rejects junk', () => {
+    for (const l of ['', 'x', '1en', 'en-', 'a'.repeat(36), 'en us', null, 5]) expect(isCaptionLang(l)).toBe(false)
+  })
+})
+
+describe('parseVideoPrefsUpdate', () => {
+  it('accepts valid partial updates', () => {
+    expect(parseVideoPrefsUpdate({ captions: true })).toEqual({ captions: true })
+    expect(parseVideoPrefsUpdate({ captionLang: null })).toEqual({ captionLang: null })
+    expect(parseVideoPrefsUpdate({ captionLang: 'pt-BR', playbackRate: 1.25 })).toEqual({
+      captionLang: 'pt-BR',
+      playbackRate: 1.25,
+    })
+  })
+  it('accepts every listed rate', () => {
+    for (const r of PLAYBACK_RATES) expect(parseVideoPrefsUpdate({ playbackRate: r })).toEqual({ playbackRate: r })
+  })
+  it('rejects everything when any field is invalid', () => {
+    expect(parseVideoPrefsUpdate({ captions: true, playbackRate: 3 })).toBeNull()
+    expect(parseVideoPrefsUpdate({ captions: 'yes' })).toBeNull()
+    expect(parseVideoPrefsUpdate({ captionLang: '!!' })).toBeNull()
+  })
+  it('rejects non-objects and objects with no valid field', () => {
+    for (const v of [null, undefined, 5, 'x', [], {}, { other: 1 }]) expect(parseVideoPrefsUpdate(v)).toBeNull()
   })
 })

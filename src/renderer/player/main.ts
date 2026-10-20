@@ -1,5 +1,6 @@
 import { describeYtError } from '../../shared/playerErrors'
-import { IDLE_STATE, type PlayerCommand, type PlayerState } from '../../shared/types'
+import { mapTracks, pickTrack } from '../../shared/captions'
+import { DEFAULT_VIDEO_PREFS, IDLE_STATE, type PlayerCommand, type PlayerState, type VideoPrefs } from '../../shared/types'
 
 interface YTPlayer {
   loadVideoById(id: string): void
@@ -10,6 +11,12 @@ interface YTPlayer {
   getCurrentTime(): number
   getDuration(): number
   getVideoData(): { title: string }
+  setOption(module: string, option: string, value: unknown): void
+  getOption(module: string, option: string): unknown
+  loadModule(module: string): void
+  unloadModule(module: string): void
+  setPlaybackRate(rate: number): void
+  getAvailablePlaybackRates(): number[]
 }
 
 declare global {
@@ -39,6 +46,62 @@ function report(patch: Partial<PlayerState>): void {
   api.report(state)
 }
 
+let prefs: VideoPrefs = { ...DEFAULT_VIDEO_PREFS }
+let prefTimers: ReturnType<typeof setTimeout>[] = []
+let appliedUid: string | undefined
+let lastExtras = ''
+
+function applyPrefs(): void {
+  const player = yt
+  if (!player || !playerReady) return
+  const patch: Partial<PlayerState> = {}
+  try {
+    const rates = player.getAvailablePlaybackRates()
+    if (Array.isArray(rates)) {
+      patch.rates = rates
+      if (rates.includes(prefs.playbackRate)) player.setPlaybackRate(prefs.playbackRate)
+    }
+  } catch {
+    // ignore
+  }
+  try {
+    if (!prefs.captions) {
+      player.setOption('captions', 'track', {})
+      player.unloadModule('captions')
+    } else {
+      player.loadModule('captions')
+      const tracks = mapTracks(player.getOption('captions', 'tracklist'))
+      patch.captionTracks = tracks
+      const code = pickTrack(tracks, prefs.captionLang)
+      if (code) player.setOption('captions', 'track', { languageCode: code })
+    }
+  } catch {
+    // ignore: the captions module is only partly documented
+  }
+  try {
+    if (!prefs.captions) patch.captionTracks = mapTracks(player.getOption('captions', 'tracklist'))
+  } catch {
+    // ignore
+  }
+  const extras = JSON.stringify([patch.captionTracks, patch.rates])
+  if (extras !== lastExtras) {
+    lastExtras = extras
+    report(patch)
+  }
+}
+
+function cancelPrefTimers(): void {
+  prefTimers.forEach(clearTimeout)
+  prefTimers = []
+}
+
+// The captions module may not be ready yet, so re-apply a couple of times.
+function schedulePrefs(): void {
+  cancelPrefTimers()
+  applyPrefs()
+  prefTimers = [setTimeout(applyPrefs, 500), setTimeout(applyPrefs, 1500)]
+}
+
 function build(): void {
   yt = new window.YT.Player('yt', {
     width: '100%',
@@ -62,6 +125,10 @@ function build(): void {
         const status = STATUS_BY_YT_STATE[event.data]
         if (!status || !yt) return
         report({ status, title: yt.getVideoData().title || state.title, duration: yt.getDuration() })
+        if (status === 'playing' && state.uid !== appliedUid) {
+          appliedUid = state.uid
+          schedulePrefs()
+        }
       },
       onError: (event: { data: number }) => {
         const info = describeYtError(event.data)
@@ -84,7 +151,15 @@ function exec(cmd: PlayerCommand): void {
         skip: undefined,
         uid: cmd.uid,
       })
+      cancelPrefTimers()
+      appliedUid = undefined
+      lastExtras = ''
       yt.loadVideoById(cmd.videoId)
+      schedulePrefs()
+      break
+    case 'prefs':
+      prefs = cmd.prefs
+      schedulePrefs()
       break
     case 'play':
       yt.playVideo()

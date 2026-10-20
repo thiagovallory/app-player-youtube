@@ -11,6 +11,22 @@ export type PlayerCommand =
   | { type: 'volume'; value: number }
   | { type: 'seek'; seconds: number }
   | { type: 'stop' }
+  | { type: 'prefs'; prefs: VideoPrefs }
+
+export type ThemePref = 'system' | 'light' | 'dark'
+
+export interface VideoPrefs {
+  captions: boolean
+  captionLang: string | null
+  playbackRate: number
+}
+
+export const DEFAULT_VIDEO_PREFS: VideoPrefs = { captions: false, captionLang: null, playbackRate: 1 }
+
+export interface CaptionTrack {
+  code: string
+  name: string
+}
 
 export type PlayerStatus = 'idle' | 'playing' | 'paused' | 'buffering' | 'ended' | 'error'
 
@@ -22,6 +38,8 @@ export interface PlayerState {
   error?: string
   skip?: boolean
   uid?: string
+  captionTracks?: CaptionTrack[]
+  rates?: number[]
 }
 
 export const IDLE_STATE: PlayerState = { status: 'idle', title: '', currentTime: 0, duration: 0 }
@@ -54,6 +72,8 @@ export interface Settings {
   volume: number
   history: string[]
   queues: SavedQueue[]
+  videoPrefs: VideoPrefs
+  theme: ThemePref
 }
 
 export interface QueueVideo {

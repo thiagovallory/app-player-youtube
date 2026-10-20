@@ -12,7 +12,7 @@ beforeEach(() => {
 
 describe('SettingsStore', () => {
   it('returns defaults when the file does not exist', () => {
-    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [], queues: [] })
+    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [], queues: [], videoPrefs: { captions: false, captionLang: null, playbackRate: 1 }, theme: 'system' })
   })
 
   it('persists display, volume and history across instances', () => {
@@ -26,6 +26,7 @@ describe('SettingsStore', () => {
       volume: 40,
       history: ['https://youtu.be/dQw4w9WgXcQ'],
       queues: [],
+      videoPrefs: { captions: false, captionLang: null, playbackRate: 1 }, theme: 'system',
     })
   })
 
@@ -66,14 +67,58 @@ describe('SettingsStore', () => {
     const store = new SettingsStore(file)
     store.setVolume(10)
     writeFileSync(file, '{not json')
-    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [], queues: [] })
+    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: [], queues: [], videoPrefs: { captions: false, captionLang: null, playbackRate: 1 }, theme: 'system' })
   })
 
   it('drops invalid field types', () => {
     const store = new SettingsStore(file)
     store.setVolume(10)
     writeFileSync(file, JSON.stringify({ volume: 'loud', history: [1, 'ok'], display: { id: 'x' } }))
-    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: ['ok'], queues: [] })
+    expect(new SettingsStore(file).get()).toEqual({ volume: 100, history: ['ok'], queues: [], videoPrefs: { captions: false, captionLang: null, playbackRate: 1 }, theme: 'system' })
+  })
+})
+
+describe('SettingsStore video prefs and theme', () => {
+  it('merges partial video prefs and persists them', () => {
+    const store = new SettingsStore(file)
+    store.setVideoPrefs({ captions: true })
+    store.setVideoPrefs({ captionLang: 'pt-BR', playbackRate: 1.5 })
+    expect(store.get().videoPrefs).toEqual({ captions: true, captionLang: 'pt-BR', playbackRate: 1.5 })
+    expect(new SettingsStore(file).get().videoPrefs).toEqual({ captions: true, captionLang: 'pt-BR', playbackRate: 1.5 })
+    store.setVideoPrefs({ captionLang: null })
+    expect(store.get().videoPrefs.captionLang).toBeNull()
+  })
+
+  it('ignores invalid video prefs updates', () => {
+    const store = new SettingsStore(file)
+    store.setVideoPrefs({ playbackRate: 3 })
+    store.setVideoPrefs({ captionLang: 'x' })
+    store.setVideoPrefs({ captions: 'yes' as unknown as boolean })
+    expect(store.get().videoPrefs).toEqual({ captions: false, captionLang: null, playbackRate: 1 })
+  })
+
+  it('persists theme and rejects invalid values', () => {
+    const store = new SettingsStore(file)
+    store.setTheme('dark')
+    store.setTheme('neon' as unknown as 'dark')
+    expect(store.get().theme).toBe('dark')
+    expect(new SettingsStore(file).get().theme).toBe('dark')
+  })
+
+  it('returns copies of the prefs', () => {
+    const store = new SettingsStore(file)
+    store.get().videoPrefs.captions = true
+    expect(store.get().videoPrefs.captions).toBe(false)
+  })
+
+  it('sanitizes stored values on read', () => {
+    writeFileSync(
+      file.replace(/nested.*/, 'bad.json'),
+      JSON.stringify({ videoPrefs: { captions: 'x', captionLang: '!!', playbackRate: 9 }, theme: 'neon' }),
+    )
+    const store = new SettingsStore(file.replace(/nested.*/, 'bad.json'))
+    expect(store.get().videoPrefs).toEqual({ captions: false, captionLang: null, playbackRate: 1 })
+    expect(store.get().theme).toBe('system')
   })
 })
 

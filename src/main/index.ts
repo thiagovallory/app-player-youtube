@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { app, dialog, ipcMain, net, screen, type BrowserWindow, type WebContents } from 'electron'
+import { app, dialog, ipcMain, nativeTheme, net, screen, type BrowserWindow, type WebContents } from 'electron'
 import {
   CMD_FROM_CONTROL,
   DISPLAYS_CHANGED,
@@ -8,6 +8,7 @@ import {
   DISPLAYS_SELECT,
   NOTICE,
   PLAYER_READY,
+  PREFS_SET,
   QUEUE_ADD,
   QUEUE_CLEAR,
   QUEUE_DELETE_SAVED,
@@ -23,7 +24,7 @@ import {
   STATE_TO_CONTROL,
 } from '../shared/ipc'
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
-import { isLoadMode, isMoveIndex, isUid, isUrlText, parseQueueName } from '../shared/validate'
+import { isLoadMode, isMoveIndex, isThemePref, isUid, isUrlText, parseQueueName, parseVideoPrefsUpdate } from '../shared/validate'
 import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
 import { createFetch } from './electronFetch'
 import { fetchTitles } from './oembed'
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
   const baseUrl =
     process.env['ELECTRON_RENDERER_URL'] ?? (await startStaticServer(join(__dirname, '../renderer'))).url
   const store = new SettingsStore(join(app.getPath('userData'), 'settings.json'))
+  nativeTheme.themeSource = store.get().theme
   let controlWin: BrowserWindow | null = null
 
   const resolveDisplays = () => {
@@ -76,6 +78,7 @@ async function main(): Promise<void> {
     playVideo: (videoId, uid) => {
       controller.send({ type: 'play-video', videoId, uid }, target())
       controller.send({ type: 'volume', value: store.get().volume }, target())
+      controller.send({ type: 'prefs', prefs: store.get().videoPrefs }, target())
     },
     stopPlayer: () => controller.close(),
     addHistory: (url) => store.addHistory(url),
@@ -178,6 +181,22 @@ async function main(): Promise<void> {
         break
     }
     controller.send(cmd, target())
+  })
+  ipcMain.on(PREFS_SET, (event, payload: unknown) => {
+    if (!isControl(event.sender)) return
+    const { videoPrefs, theme } = (typeof payload === 'object' && payload !== null ? payload : {}) as {
+      videoPrefs?: unknown
+      theme?: unknown
+    }
+    if (isThemePref(theme)) {
+      store.setTheme(theme)
+      nativeTheme.themeSource = theme
+    }
+    const update = parseVideoPrefsUpdate(videoPrefs)
+    if (update) {
+      store.setVideoPrefs(update)
+      controller.send({ type: 'prefs', prefs: store.get().videoPrefs }, target())
+    }
   })
   ipcMain.on(PLAYER_READY, (event) => {
     if (controller.owns(event.sender)) controller.markReady()
