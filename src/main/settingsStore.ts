@@ -1,7 +1,16 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
-import type { QueueVideo, SavedDisplay, SavedQueue, Settings } from '../shared/types'
-import { MAX_QUEUE_ITEMS, MAX_SAVED_QUEUES, isVideoId, parseQueueName } from '../shared/validate'
+import type { QueueVideo, SavedDisplay, SavedQueue, Settings, ThemePref, VideoPrefs } from '../shared/types'
+import {
+  MAX_QUEUE_ITEMS,
+  MAX_SAVED_QUEUES,
+  isCaptionLang,
+  isPlaybackRate,
+  isThemePref,
+  isVideoId,
+  parseQueueName,
+  parseVideoPrefsUpdate,
+} from '../shared/validate'
 
 const MAX_HISTORY = 10
 
@@ -38,6 +47,15 @@ const copyQueue = (q: SavedQueue): SavedQueue => ({
   items: q.items.map((item) => ({ videoId: item.videoId, title: item.title })),
 })
 
+function readVideoPrefs(v: unknown): VideoPrefs {
+  const raw = (typeof v === 'object' && v !== null ? v : {}) as Record<string, unknown>
+  return {
+    captions: raw.captions === true,
+    captionLang: isCaptionLang(raw.captionLang) ? raw.captionLang : null,
+    playbackRate: isPlaybackRate(raw.playbackRate) ? raw.playbackRate : 1,
+  }
+}
+
 export class SettingsStore {
   private data: Settings
 
@@ -46,7 +64,12 @@ export class SettingsStore {
   }
 
   get(): Settings {
-    return { ...this.data, history: [...this.data.history], queues: this.data.queues.map(copyQueue) }
+    return {
+      ...this.data,
+      history: [...this.data.history],
+      queues: this.data.queues.map(copyQueue),
+      videoPrefs: { ...this.data.videoPrefs },
+    }
   }
 
   queueNames(): string[] {
@@ -61,6 +84,19 @@ export class SettingsStore {
   setVolume(volume: number): void {
     if (!Number.isFinite(volume)) return
     this.data.volume = clampVolume(volume)
+    this.save()
+  }
+
+  setVideoPrefs(update: Partial<VideoPrefs>): void {
+    const clean = parseVideoPrefsUpdate(update)
+    if (!clean) return
+    this.data.videoPrefs = { ...this.data.videoPrefs, ...clean }
+    this.save()
+  }
+
+  setTheme(theme: ThemePref): void {
+    if (!isThemePref(theme)) return
+    this.data.theme = theme
     this.save()
   }
 
@@ -101,9 +137,11 @@ export class SettingsStore {
           : [],
         display: isSavedDisplay(raw.display) ? raw.display : undefined,
         queues: Array.isArray(raw.queues) ? raw.queues.filter(isSavedQueue).slice(0, MAX_SAVED_QUEUES).map(copyQueue) : [],
+        videoPrefs: readVideoPrefs(raw.videoPrefs),
+        theme: isThemePref(raw.theme) ? raw.theme : 'system',
       }
     } catch {
-      return { volume: 100, history: [], queues: [] }
+      return { volume: 100, history: [], queues: [], videoPrefs: readVideoPrefs(null), theme: 'system' }
     }
   }
 

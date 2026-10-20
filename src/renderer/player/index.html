@@ -5,7 +5,10 @@
     <title>Player</title>
     <style>
       html, body, #stage { margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+      body { cursor: none; }
       #yt { width: 100%; height: 100%; }
+      /* display-only window: controls live in the control window */
+      #stage iframe { pointer-events: none; }
     </style>
   </head>
   <body>

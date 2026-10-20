@@ -9,6 +9,7 @@ export interface ControlApi {
   identifyDisplays(): Promise<void>
   getSettings(): Promise<Settings>
   sendCommand(cmd: PlayerCommand): void
+  setPrefs(update: { videoPrefs?: unknown; theme?: unknown }): void
   queueGet(): Promise<QueueState | null>
   queueAdd(url: string, playNow: boolean): void
   queueRemove(uid: string): void

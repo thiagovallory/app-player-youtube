@@ -3,6 +3,7 @@ import { hydrateIcons } from './icons'
 import { initMenu } from './menu'
 import { initNotice } from './notice'
 import { initPlayback } from './playback'
+import { initPrefs } from './prefs'
 import { initQueue } from './queue'
 
 hydrateIcons()
@@ -11,3 +12,4 @@ initNotice()
 void initDisplays()
 void initPlayback()
 void initQueue()
+void initPrefs()

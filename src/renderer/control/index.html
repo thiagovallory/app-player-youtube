@@ -29,6 +29,27 @@
           </section>
 
           <section class="menu-block">
+            <span class="label">Reprodução e aparência</span>
+            <label class="check" for="opt-captions"><input id="opt-captions" type="checkbox" /> Mostrar legendas</label>
+            <div class="field">
+              <label for="opt-caption-lang" class="label">Idioma das legendas</label>
+              <select id="opt-caption-lang" disabled></select>
+            </div>
+            <div class="field">
+              <label for="opt-rate" class="label">Velocidade</label>
+              <select id="opt-rate"></select>
+            </div>
+            <div class="field">
+              <label for="opt-theme" class="label">Tema</label>
+              <select id="opt-theme">
+                <option value="system">Automático (sistema)</option>
+                <option value="light">Claro</option>
+                <option value="dark">Escuro</option>
+              </select>
+            </div>
+          </section>
+
+          <section class="menu-block">
             <label for="queue-name" class="label">Salvar fila</label>
             <div class="row">
               <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />

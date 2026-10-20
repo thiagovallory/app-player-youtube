@@ -16,6 +16,7 @@ export class PlayerController {
   private mode: Mode = 'screen'
   private lastPlay: PlayerCommand | null = null
   private lastVolume: PlayerCommand | null = null
+  private lastPrefs: PlayerCommand | null = null
   private readonly queue = new CommandQueue<PlayerCommand>((cmd) =>
     this.win?.webContents.send(CMD_TO_PLAYER, cmd),
   )
@@ -49,6 +50,8 @@ export class PlayerController {
       this.place(target, replay)
     } else if (cmd.type === 'volume') {
       this.lastVolume = cmd
+    } else if (cmd.type === 'prefs') {
+      this.lastPrefs = cmd
     }
     this.queue.push(cmd)
   }
@@ -62,6 +65,7 @@ export class PlayerController {
     this.destroy()
     this.lastPlay = null
     this.lastVolume = null
+    this.lastPrefs = null
     this.onClosed()
   }
 
@@ -73,6 +77,7 @@ export class PlayerController {
       if (replay) {
         this.queue.push(replay)
         if (this.lastVolume) this.queue.push(this.lastVolume)
+        if (this.lastPrefs) this.queue.push(this.lastPrefs)
       }
     } else if (mode === 'screen') {
       const { x, y, width, height } = target.display
@@ -90,6 +95,7 @@ export class PlayerController {
       this.win = null
       this.lastPlay = null
       this.lastVolume = null
+      this.lastPrefs = null
       this.queue.reset()
       this.onClosed()
     })

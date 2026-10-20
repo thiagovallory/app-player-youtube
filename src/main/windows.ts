@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { BrowserWindow } from 'electron'
 import type { DisplayInfo } from '../shared/types'
 import { appIconPath } from './appIcon'
+import { hideEmbedChrome } from './hideEmbedChrome'
 
 function webPreferences(preload?: string) {
   return {
@@ -68,6 +69,7 @@ export function createPlayerWindow(
   win.setMenuBarVisibility(false)
   if (!windowed) win.setAlwaysOnTop(true, 'screen-saver')
   lockDown(win)
+  hideEmbedChrome(win.webContents)
   win.once('ready-to-show', () => {
     if (windowed) {
       win.show()
