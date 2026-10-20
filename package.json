@@ -10,10 +10,10 @@
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "dist": "npm run build && electron-builder --mac --win",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:win-legacy": "npm run build && electron-builder --win nsis --x64 --ia32 --config electron-builder.legacy.yml"
+    "dist": "npm run build && electron-builder --mac --win --publish never",
+    "dist:mac": "npm run build && electron-builder --mac --publish never",
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:win-legacy": "npm run build && electron-builder --win nsis --x64 --ia32 --config electron-builder.legacy.yml --publish never"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
