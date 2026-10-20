@@ -20,7 +20,16 @@ mac:
       arch:
         - arm64
         - x64
+    - target: dmg
+      arch:
+        - arm64
+        - x64
   artifactName: Player-YouTube-${version}-mac-${arch}.${ext}
+dmg:
+  title: Player YouTube ${version}
+  window:
+    width: 540
+    height: 380
 win:
   icon: build/icon.ico
   electronLanguages:

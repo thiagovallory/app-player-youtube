@@ -4,8 +4,10 @@
 
 | Sistema | Arquivo | Como usar |
 |---|---|---|
-| macOS (Apple Silicon) | `Player-YouTube-{{version}}-mac-arm64.zip` | Descompacte e execute |
-| macOS (Intel) | `Player-YouTube-{{version}}-mac-x64.zip` | Descompacte e execute |
+| macOS (Apple Silicon) | `Player-YouTube-{{version}}-mac-arm64.dmg` | Instalar (abra o `.dmg` e arraste para Aplicativos) |
+| macOS (Intel) | `Player-YouTube-{{version}}-mac-x64.dmg` | Instalar (abra o `.dmg` e arraste para Aplicativos) |
+| macOS (Apple Silicon) | `Player-YouTube-{{version}}-mac-arm64.zip` | Executar (descompacte o `.zip`) |
+| macOS (Intel) | `Player-YouTube-{{version}}-mac-x64.zip` | Executar (descompacte o `.zip`) |
 | Windows 10/11 (64 bits) | `Player-YouTube-{{version}}-win-x64-setup.exe` | Instalador (por usuário, sem administrador) |
 | Windows 10/11 (64 bits) | `Player-YouTube-{{version}}-win-x64-portable.exe` | Sem instalar (abre mais devagar) |
 | Windows 10/11 (ARM) | `Player-YouTube-{{version}}-win-arm64-setup.exe` | Instalador |

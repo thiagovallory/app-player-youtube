@@ -26,10 +26,12 @@ export function createControlWindow(baseUrl: string): BrowserWindow {
     minWidth: 360,
     minHeight: 480,
     title: 'Player YouTube',
+    autoHideMenuBar: true,
     icon: appIconPath(),
     backgroundColor: '#111111',
     webPreferences: webPreferences('control'),
   })
+  win.setMenuBarVisibility(false)
   lockDown(win)
   win.loadURL(`${baseUrl}/control/index.html`).catch(() => {})
   return win

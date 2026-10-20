@@ -37,26 +37,27 @@ npm test           # testes unitários
 
 1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Adicionar não toca sozinho: se a fila estava vazia, o primeiro item fica apenas selecionado. Para tocar, use **Tocar agora** (substitui a fila inteira pelo link e toca), o botão ▶ ou clique no título de um item da fila. Se o vídeo já estiver na fila, o app pede confirmação antes de adicionar de novo.
 2. Playlists entram com todos os vídeos (até 200); os títulos aparecem aos poucos.
-3. Na fila: arraste para reordenar, ✕ remove, clique no título para tocar aquele item, **Limpar** esvazia.
+3. Na fila: arraste para reordenar, ✕ remove, clique no título para tocar aquele item, **Limpar** esvazia. Clique com o botão direito num item (ou use a tecla de menu de contexto / Shift+F10) para **Copiar link do vídeo**.
 4. O menu **☰** (canto superior esquerdo) abre em tela cheia sobre a janela de controle; feche com o botão **✕**, com Esc ou ao escolher Adicionar/Substituir numa fila salva. Ele reúne quatro blocos:
    - **Monitor**: escolha o monitor de reprodução (**Identificar** mostra o número em cada tela).
    - **Salvar fila**: guarda a fila atual com um nome.
    - **Filas salvas**: **Adicionar** acrescenta os itens ao fim da fila atual (sem tocar), **Substituir** troca a fila atual, seleciona o primeiro item e para o player (sem tocar) e **Excluir** apaga a fila salva. A fila ativa não é restaurada ao abrir o app.
    - **Reprodução e aparência**: **Mostrar legendas** (desligado por padrão), **Idioma das legendas** (Automático usa o idioma do sistema, ou escolha um idioma da lista; os idiomas do vídeo atual aparecem na lista). As legendas automáticas do YouTube também funcionam: o idioma escolhido é pedido mesmo quando o vídeo não lista faixas, **Velocidade** (0,25× a 2×) e **Tema** (Automático segue o claro/escuro do computador, ou escolha Claro/Escuro). As escolhas ficam salvas para as próximas vezes.
 5. Use play/pause, anterior/próximo, seek e volume. **Parar** fecha o player e mantém a fila. O botão "Mais vídeos" e a logo do YouTube que aparecem sobre o vídeo são ocultados, e a janela do player não responde a cliques.
-6. **Modo compacto**: o botão no canto do cartão "tocando agora" reduz a janela de controle a só esse cartão (título, status, posição e a linha de controles: parar, anterior, play/pause, próximo e volume). Clique de novo (**Expandir**) para voltar ao tamanho normal. O app sempre abre no modo normal.
+6. **Modo compacto**: o botão no canto do cartão "tocando agora" reduz a janela de controle a só esse cartão (título, status, posição e a linha de controles: parar, anterior, play/pause, próximo e volume). Clique de novo (**Expandir**) para voltar ao tamanho normal. O app sempre abre no modo normal. Quando a janela é larga, os controles ficam centralizados (o volume tem largura limitada), nos dois modos.
+7. **Menu do app**: no Windows e no Linux o app não tem barra de menu. No macOS a barra do sistema não pode ser escondida, então o menu foi reduzido ao mínimo (app, Editar e Janela). Em desenvolvimento (`npm run dev`) o menu padrão, com as ferramentas de desenvolvedor, continua disponível.
 
 ## Gerar executáveis
 
 Os arquivos saem em `dist/` (fora do git).
 
 ```bash
-npm run dist:mac   # macOS: .zip com o Player YouTube.app (arm64 e x64)
+npm run dist:mac   # macOS: .dmg (instalador) e .zip com o Player YouTube.app (arm64 e x64)
 npm run dist:win   # Windows 10/11: instaladores x64 e arm64 + .exe portátil x64
 npm run dist:win-legacy   # Windows 7/8/8.1 (e 10/11 de 32 bits): instaladores x64 e 32 bits (Electron 22)
 ```
 
-- **macOS:** descompacte o `.zip` e execute o app, sem instalar. Ele não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia. Para liberar (escolha um):
+- **macOS:** há dois formatos. O `.zip` é para executar sem instalar (descompacte e abra o app). O `.dmg` é para instalar: abra-o e arraste o **Player YouTube** para a pasta **Aplicativos**. O app não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia. Para liberar (escolha um):
   - **Terminal (mais simples):** `xattr -dr com.apple.quarantine "/caminho/para/Player YouTube.app"` (arraste o app para a janela do Terminal para preencher o caminho). Rode o comando **depois** de descompactar e **no app que você vai abrir**; se descompactar de novo, a marca volta. Se der "Operation not permitted", dê permissão ao Terminal em Ajustes do Sistema > Privacidade e Segurança > Gerenciamento de Apps (ou Acesso Total ao Disco).
   - **Ajustes do Sistema (macOS 15 Sequoia ou mais novo):** tente abrir o app, clique em "Concluído"/"OK", vá em Ajustes do Sistema > Privacidade e Segurança, role até "Segurança" e clique em **Abrir Mesmo Assim**.
   - **macOS 14 ou mais antigo:** botão direito no app > Abrir > Abrir.

@@ -61,6 +61,7 @@ jobs:
           name: installers-${{ matrix.name }}
           path: |
             dist/*.zip
+            dist/*.dmg
             dist/*.exe
             dist-legacy/*.exe
           if-no-files-found: error
@@ -80,7 +81,7 @@ jobs:
           path: artifacts
       - name: Publish release
         run: |
-          mapfile -t files < <(find artifacts -type f \( -name '*.zip' -o -name '*.exe' \) | sort)
+          mapfile -t files < <(find artifacts -type f \( -name '*.zip' -o -name '*.dmg' -o -name '*.exe' \) | sort)
           printf 'Arquivos:\n%s\n' "${files[@]}"
           sed "s/{{version}}/${TAG#v}/g" .github/release-notes.md > release-notes.generated.md
           if gh release view "$TAG" >/dev/null 2>&1; then

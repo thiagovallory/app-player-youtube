@@ -21,6 +21,62 @@ export async function initQueue(): Promise<void> {
   const savedEmpty = byId<HTMLElement>('saved-empty')
 
   let dragUid: string | null = null
+  let ctxMenu: HTMLElement | null = null
+  let ctxReturnFocus: HTMLElement | null = null
+
+  const closeContextMenu = (restoreFocus = false) => {
+    if (!ctxMenu) return
+    ctxMenu.remove()
+    ctxMenu = null
+    if (restoreFocus && ctxReturnFocus?.isConnected) ctxReturnFocus.focus()
+    ctxReturnFocus = null
+  }
+
+  const openContextMenu = (uid: string, x: number, y: number, returnTo: HTMLElement) => {
+    closeContextMenu()
+    const menu = document.createElement('div')
+    menu.className = 'context-menu'
+    menu.setAttribute('role', 'menu')
+    menu.setAttribute('aria-label', 'Ações do item')
+    const item = document.createElement('button')
+    item.type = 'button'
+    item.className = 'context-item'
+    item.setAttribute('role', 'menuitem')
+    item.append(icon('copy'), 'Copiar link do vídeo')
+    item.addEventListener('click', () => {
+      window.control.queueCopyLink(uid)
+      closeContextMenu(true)
+    })
+    menu.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+        closeContextMenu(true)
+      } else if (e.key === 'Tab') {
+        e.preventDefault()
+      }
+    })
+    menu.append(item)
+    document.body.append(menu)
+    // Mantém o menu dentro da janela: se não couber à direita/embaixo, abre para o outro lado.
+    const margin = 4
+    const w = menu.offsetWidth
+    const h = menu.offsetHeight
+    const left = x + w + margin > window.innerWidth ? x - w : x
+    const top = y + h + margin > window.innerHeight ? y - h : y
+    menu.style.left = `${Math.max(margin, left)}px`
+    menu.style.top = `${Math.max(margin, top)}px`
+    ctxMenu = menu
+    ctxReturnFocus = returnTo
+    item.focus()
+  }
+
+  document.addEventListener('mousedown', (e) => {
+    if (ctxMenu && !ctxMenu.contains(e.target as Node)) closeContextMenu()
+  }, true)
+  document.addEventListener('scroll', () => closeContextMenu(), true)
+  window.addEventListener('blur', () => closeContextMenu())
+  window.addEventListener('resize', () => closeContextMenu())
   let pushed = false
   let state: QueueState = { items: [], currentUid: null, expanding: false, saved: [] }
 
@@ -56,6 +112,17 @@ export async function initQueue(): Promise<void> {
     remove.addEventListener('click', () => window.control.queueRemove(item.uid))
 
     li.append(index, title, handle, remove)
+
+    li.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      let { clientX: x, clientY: y } = e
+      if (x === 0 && y === 0) {
+        const rect = li.getBoundingClientRect()
+        x = rect.left + 40
+        y = rect.bottom
+      }
+      openContextMenu(item.uid, x, y, title)
+    })
 
     li.addEventListener('dragstart', (e) => {
       dragUid = item.uid
@@ -131,6 +198,7 @@ export async function initQueue(): Promise<void> {
     status.hidden = !next.expanding
     clear.disabled = next.items.length === 0
     save.disabled = next.items.length === 0
+    closeContextMenu()
     list.replaceChildren(...next.items.map(row))
 
     savedEmpty.hidden = next.saved.length > 0

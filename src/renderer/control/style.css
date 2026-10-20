@@ -133,7 +133,7 @@ button:disabled { opacity: 0.45; cursor: default; }
 .time { min-width: 34px; font-size: var(--fs-sm); color: var(--muted); font-variant-numeric: tabular-nums; }
 #duration { text-align: right; }
 .seek-row input[type='range'] { flex: 1; min-width: 0; }
-.controls { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.controls { display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-width: 0; }
 #compact-toggle { position: absolute; top: var(--space-2); right: var(--space-2); color: var(--muted); }
 #compact-toggle:hover:not(:disabled) { color: var(--text); }
 .icon-btn.round { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--accent-on); }
@@ -143,8 +143,8 @@ button:disabled { opacity: 0.45; cursor: default; }
 #stop.btn.ghost { color: var(--danger); padding: 0 8px; }
 #stop.btn.ghost:hover:not(:disabled) { background: var(--danger-tint); color: var(--danger); }
 #stop svg.icon { width: 14px; height: 14px; }
-.vol { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 80px; min-width: 80px; color: var(--muted); }
-.vol input[type='range'] { flex: 1; min-width: 56px; }
+.vol { display: flex; align-items: center; gap: var(--space-2); flex: 0 1 160px; min-width: 80px; color: var(--muted); }
+.vol input[type='range'] { flex: 1 1 110px; min-width: 56px; }
 .vol-icon { flex: none; }
 
 @media (max-width: 399px) {
@@ -184,6 +184,12 @@ input[type='range']:focus-visible { outline: 2px solid var(--accent-hover); outl
 .handle { flex: none; width: 24px; display: inline-flex; justify-content: center; color: var(--muted); cursor: grab; user-select: none; }
 .queue-remove { width: 32px; height: 32px; color: var(--muted); }
 .queue-remove:hover { color: var(--danger); background: var(--danger-tint); }
+
+/* menu de contexto da fila */
+.context-menu { position: fixed; z-index: 40; min-width: 180px; padding: var(--space-1); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); box-shadow: var(--shadow-notice); }
+.context-item { width: 100%; height: 32px; padding: 0 10px; display: flex; align-items: center; gap: var(--space-2); text-align: left; white-space: nowrap; background: transparent; border-radius: var(--radius-sm); }
+.context-item:hover, .context-item:focus-visible { background: var(--surface-3); }
+.context-item:focus-visible { outline-offset: -2px; }
 
 /* avisos */
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
