@@ -96,7 +96,6 @@ export class PlayerController {
       this.lastPlay = null
       this.lastVolume = null
       this.lastPrefs = null
-    this.lastPrefs = null
       this.queue.reset()
       this.onClosed()
     })

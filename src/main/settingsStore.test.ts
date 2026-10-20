@@ -1,6 +1,6 @@
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SettingsStore } from './settingsStore'
 
@@ -112,11 +112,13 @@ describe('SettingsStore video prefs and theme', () => {
   })
 
   it('sanitizes stored values on read', () => {
+    mkdirSync(dirname(file), { recursive: true })
+    const bad = join(dirname(file), 'bad.json')
     writeFileSync(
-      file.replace(/nested.*/, 'bad.json'),
+      bad,
       JSON.stringify({ videoPrefs: { captions: 'x', captionLang: '!!', playbackRate: 9 }, theme: 'neon' }),
     )
-    const store = new SettingsStore(file.replace(/nested.*/, 'bad.json'))
+    const store = new SettingsStore(bad)
     expect(store.get().videoPrefs).toEqual({ captions: false, captionLang: null, playbackRate: 1 })
     expect(store.get().theme).toBe('system')
   })

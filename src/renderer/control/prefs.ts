@@ -69,8 +69,12 @@ export async function initPrefs(): Promise<void> {
   })
 
   // Extra languages offered by the current video; the selection is preserved.
+  let lastTracks = ''
   window.control.onState((state) => {
     if (!state.captionTracks) return
+    const key = JSON.stringify(state.captionTracks.map((t) => [t.code, t.name]))
+    if (key === lastTracks) return
+    lastTracks = key
     const selected = lang.value
     state.captionTracks.forEach((t) => addOption(t.code, t.name))
     lang.value = selected

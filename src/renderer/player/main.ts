@@ -150,12 +150,13 @@ function exec(cmd: PlayerCommand): void {
         error: undefined,
         skip: undefined,
         uid: cmd.uid,
+        captionTracks: undefined,
+        rates: undefined,
       })
       cancelPrefTimers()
       appliedUid = undefined
       lastExtras = ''
       yt.loadVideoById(cmd.videoId)
-      schedulePrefs()
       break
     case 'prefs':
       prefs = cmd.prefs
