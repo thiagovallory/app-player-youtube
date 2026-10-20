@@ -34,7 +34,7 @@ export async function initPrefs(): Promise<void> {
 
   const auto = document.createElement('option')
   auto.value = ''
-  auto.textContent = 'Automático'
+  auto.textContent = 'Automático (idioma do sistema)'
   lang.append(auto)
   COMMON_LANGS.forEach((l) => addOption(l.code, l.name))
 

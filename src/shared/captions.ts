@@ -31,3 +31,19 @@ export function pickTrack(tracks: CaptionTrack[], lang: string | null): string |
   const loose = tracks.find((t) => norm(t.code).split('-')[0] === prefix)
   return loose ? loose.code : null
 }
+
+const baseLang = (code: unknown): string => {
+  if (typeof code !== 'string') return ''
+  return code.toLowerCase().split(/[-_]/)[0].trim()
+}
+
+// Always returns a caption language code. Auto-generated (ASR) captions do not show up in
+// the tracklist, so the code is requested even when no listed track matches.
+export function chooseCaptionCode(tracks: CaptionTrack[], lang: string | null, uiLang: string): string {
+  if (lang) return pickTrack(tracks, lang) ?? lang
+  const ui = typeof uiLang === 'string' ? uiLang : ''
+  const fromUi = pickTrack(tracks, ui)
+  if (fromUi) return fromUi
+  if (tracks.length > 0) return tracks[0].code
+  return baseLang(ui) || 'en'
+}
