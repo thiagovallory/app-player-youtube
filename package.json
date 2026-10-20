@@ -1,6 +1,6 @@
 {
   "name": "app-player-youtube",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Player de YouTube que toca em monitor secundário",
   "main": "./out/main/index.js",
