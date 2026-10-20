@@ -1,6 +1,5 @@
 import { COMPACT_MAX_HEIGHT, COMPACT_MIN_HEIGHT } from '../../shared/validate'
 import { icon } from './icons'
-import { CLOSE_MENU_EVENT } from './menu'
 
 export function initCompact(): void {
   const root = document.documentElement
@@ -34,7 +33,6 @@ export function initCompact(): void {
     button.title = label
     lastHeight = 0
     if (next) {
-      document.dispatchEvent(new Event(CLOSE_MENU_EVENT))
       observer.observe(main)
       scheduleMeasure()
     } else {

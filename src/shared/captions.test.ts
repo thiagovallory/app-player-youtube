@@ -60,9 +60,15 @@ describe('chooseCaptionCode', () => {
     expect(chooseCaptionCode(tracks, 'pt-BR', 'en')).toBe('pt')
     expect(chooseCaptionCode(tracks, 'en', 'pt-BR')).toBe('en-US')
   })
-  it('uses the explicit language itself when nothing matches or the list is empty (ASR)', () => {
+  it('uses the explicit language verbatim when a non-empty list has no match', () => {
     expect(chooseCaptionCode(tracks, 'ja', 'pt-BR')).toBe('ja')
-    expect(chooseCaptionCode([], 'pt-BR', 'en')).toBe('pt-BR')
+    expect(chooseCaptionCode(tracks, 'zh-Hans', 'en')).toBe('zh-Hans')
+  })
+  it('uses the base language of an explicit language when the list is empty (ASR)', () => {
+    expect(chooseCaptionCode([], 'pt-BR', 'en')).toBe('pt')
+    expect(chooseCaptionCode([], 'en', 'pt-BR')).toBe('en')
+    expect(chooseCaptionCode([], 'en_US', 'pt')).toBe('en')
+    expect(chooseCaptionCode([], 'zh-Hans', 'pt')).toBe('zh')
   })
   it('automatic: matches the UI language, else the first track', () => {
     expect(chooseCaptionCode(tracks, null, 'pt-BR')).toBe('pt')

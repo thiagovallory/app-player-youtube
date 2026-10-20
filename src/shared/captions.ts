@@ -40,7 +40,11 @@ const baseLang = (code: unknown): string => {
 // Always returns a caption language code. Auto-generated (ASR) captions do not show up in
 // the tracklist, so the code is requested even when no listed track matches.
 export function chooseCaptionCode(tracks: CaptionTrack[], lang: string | null, uiLang: string): string {
-  if (lang) return pickTrack(tracks, lang) ?? lang
+  if (lang) {
+    // Auto-generated (ASR) tracks are not listed and use the bare language code.
+    if (tracks.length === 0) return baseLang(lang) || lang
+    return pickTrack(tracks, lang) ?? lang
+  }
   const ui = typeof uiLang === 'string' ? uiLang : ''
   const fromUi = pickTrack(tracks, ui)
   if (fromUi) return fromUi

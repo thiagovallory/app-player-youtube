@@ -1,7 +1,6 @@
 import { join } from 'node:path'
 import { BrowserWindow } from 'electron'
 import type { DisplayInfo } from '../shared/types'
-import type { CompactRequest } from '../shared/validate'
 import { appIconPath } from './appIcon'
 import { hideEmbedChrome } from './hideEmbedChrome'
 
@@ -121,29 +120,4 @@ export function createProbeWindow(baseUrl: string, listId: string): BrowserWindo
   lockDown(win)
   win.loadURL(`${baseUrl}/probe/index.html#${listId}`).catch(() => {})
   return win
-}
-
-const COMPACT_MIN_WIDTH = 320
-
-// Compact mode only shrinks the control window; the normal size and minimum are kept in
-// memory and restored on exit (nothing is persisted).
-export function createCompactController(getWindow: () => BrowserWindow | null) {
-  let normal: { bounds: Electron.Rectangle; min: [number, number] } | null = null
-  return {
-    apply(request: CompactRequest): void {
-      const win = getWindow()
-      if (!win || win.isDestroyed()) return
-      if (request.compact) {
-        if (!normal) normal = { bounds: win.getBounds(), min: win.getMinimumSize() as [number, number] }
-        const [width] = win.getContentSize()
-        win.setMinimumSize(COMPACT_MIN_WIDTH, request.height)
-        win.setContentSize(width, request.height)
-      } else if (normal) {
-        const { bounds, min } = normal
-        normal = null
-        win.setMinimumSize(min[0], min[1])
-        win.setBounds(bounds)
-      }
-    },
-  }
 }

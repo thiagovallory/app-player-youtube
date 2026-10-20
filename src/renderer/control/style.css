@@ -21,7 +21,7 @@
   --warn-tint: rgba(148, 98, 0, 0.14);
   --notice-bg: #fff3d1;
   --notice-border: rgba(148, 98, 0, 0.45);
-    --shadow-notice: 0 6px 20px rgba(23, 23, 28, 0.16);
+  --shadow-notice: 0 6px 20px rgba(23, 23, 28, 0.16);
   --radius-sm: 6px;
   --radius: 8px;
   --radius-lg: 12px;
@@ -155,7 +155,7 @@ button:disabled { opacity: 0.45; cursor: default; }
 /* modo compacto: só o cartão "tocando agora" */
 html[data-compact='true'], html[data-compact='true'] body { height: auto; }
 html[data-compact='true'] main { height: auto; padding: var(--space-2); }
-html[data-compact='true'] .top, html[data-compact='true'] .queue, html[data-compact='true'] .notice-bar, html[data-compact='true'] .menu { display: none !important; }
+html[data-compact='true'] .top, html[data-compact='true'] .queue, html[data-compact='true'] .notice-bar { display: none !important; }
 
 /* sliders */
 input[type='range'] { -webkit-appearance: none; appearance: none; height: 16px; background: transparent; margin: 0; cursor: pointer; accent-color: var(--accent); }

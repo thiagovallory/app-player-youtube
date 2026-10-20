@@ -34,7 +34,8 @@ import { expandPlaylist } from './playlistExpander'
 import { QueueManager } from './queueManager'
 import { SettingsStore } from './settingsStore'
 import { startStaticServer } from './staticServer'
-import { createControlWindow, createCompactController, identifyDisplays } from './windows'
+import { createCompactController } from './compactMode'
+import { createControlWindow, identifyDisplays } from './windows'
 
 async function main(): Promise<void> {
   await app.whenReady()
@@ -228,6 +229,7 @@ async function main(): Promise<void> {
 
   controlWin = createControlWindow(baseUrl)
   controlWin.on('closed', () => {
+    compactMode.reset()
     controlWin = null
     app.quit()
   })
