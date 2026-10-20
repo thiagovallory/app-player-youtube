@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-compact="false">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,55 +17,10 @@
           <button id="play-now" class="btn" type="button" title="Tocar agora">Tocar agora</button>
         </div>
         <p id="url-error" class="error" hidden></p>
-
-        <div id="menu-panel" class="menu" role="dialog" aria-label="Menu" hidden>
-          <section class="menu-block">
-            <label for="display" class="label">Monitor de reprodução</label>
-            <select id="display"></select>
-            <div class="row">
-              <button id="identify" class="btn" type="button">Identificar</button>
-            </div>
-            <p id="single-warning" class="warn" hidden>Só um monitor detectado — o player abrirá em janela comum.</p>
-          </section>
-
-          <section class="menu-block">
-            <span class="label">Reprodução e aparência</span>
-            <label class="check" for="opt-captions"><input id="opt-captions" type="checkbox" /> Mostrar legendas</label>
-            <div class="field">
-              <label for="opt-caption-lang" class="label">Idioma das legendas</label>
-              <select id="opt-caption-lang" disabled></select>
-            </div>
-            <div class="field">
-              <label for="opt-rate" class="label">Velocidade</label>
-              <select id="opt-rate"></select>
-            </div>
-            <div class="field">
-              <label for="opt-theme" class="label">Tema</label>
-              <select id="opt-theme">
-                <option value="system">Automático (sistema)</option>
-                <option value="light">Claro</option>
-                <option value="dark">Escuro</option>
-              </select>
-            </div>
-          </section>
-
-          <section class="menu-block">
-            <label for="queue-name" class="label">Salvar fila</label>
-            <div class="row">
-              <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />
-              <button id="queue-save" class="btn primary" type="button">Salvar</button>
-            </div>
-          </section>
-
-          <section class="menu-block">
-            <span class="label">Filas salvas</span>
-            <p id="saved-empty" class="muted">Nenhuma fila salva.</p>
-            <ul id="saved-list" aria-label="Filas salvas"></ul>
-          </section>
-        </div>
       </header>
 
       <section class="now">
+        <button id="compact-toggle" class="icon-btn" type="button" aria-label="Modo compacto" title="Modo compacto"><span data-icon="minimize"></span></button>
         <div class="now-head">
           <h1 id="title">Nada tocando</h1>
           <p id="status" class="chip">Parado</p>
@@ -77,12 +32,10 @@
           <span id="duration" class="time">0:00</span>
         </div>
         <div class="controls">
+          <button id="stop" class="btn ghost" type="button" aria-label="Parar e fechar o player" title="Parar e fechar o player"><span data-icon="stop"></span><span class="stop-label">Parar e fechar</span></button>
           <button id="prev" class="icon-btn" type="button" aria-label="Anterior" title="Anterior"><span data-icon="skip-prev"></span></button>
           <button id="toggle" class="icon-btn round" type="button" aria-label="Tocar" title="Tocar"><span data-icon="play"></span></button>
           <button id="next" class="icon-btn" type="button" aria-label="Próximo" title="Próximo"><span data-icon="skip-next"></span></button>
-        </div>
-        <div class="secondary">
-          <button id="stop" class="btn ghost" type="button" aria-label="Parar e fechar o player" title="Parar e fechar o player"><span data-icon="stop"></span>Parar e fechar</button>
           <span class="vol"><span class="vol-icon" data-icon="volume"></span><input id="volume" type="range" min="0" max="100" step="1" value="100" aria-label="Volume" /></span>
         </div>
       </section>
@@ -103,6 +56,57 @@
         <button id="notice-close" class="icon-btn" type="button" aria-label="Fechar aviso" title="Fechar aviso"><span data-icon="x"></span></button>
       </div>
     </main>
+    <div id="menu-panel" class="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+      <header class="menu-head">
+        <h2>Menu</h2>
+        <button id="menu-close" class="icon-btn" type="button" aria-label="Fechar menu" title="Fechar menu"><span data-icon="x"></span></button>
+      </header>
+      <div class="menu-body">
+        <section class="menu-block">
+          <label for="display" class="label">Monitor de reprodução</label>
+          <select id="display"></select>
+          <div class="row">
+            <button id="identify" class="btn" type="button">Identificar</button>
+          </div>
+          <p id="single-warning" class="warn" hidden>Só um monitor detectado — o player abrirá em janela comum.</p>
+        </section>
+
+        <section class="menu-block">
+          <span class="label">Reprodução e aparência</span>
+          <label class="check" for="opt-captions"><input id="opt-captions" type="checkbox" /> Mostrar legendas</label>
+          <div class="field">
+            <label for="opt-caption-lang" class="label">Idioma das legendas</label>
+            <select id="opt-caption-lang" disabled></select>
+          </div>
+          <div class="field">
+            <label for="opt-rate" class="label">Velocidade</label>
+            <select id="opt-rate"></select>
+          </div>
+          <div class="field">
+            <label for="opt-theme" class="label">Tema</label>
+            <select id="opt-theme">
+              <option value="system">Automático (sistema)</option>
+              <option value="light">Claro</option>
+              <option value="dark">Escuro</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="menu-block">
+          <label for="queue-name" class="label">Salvar fila</label>
+          <div class="row">
+            <input id="queue-name" type="text" maxlength="100" placeholder="Nome da fila" autocomplete="off" />
+            <button id="queue-save" class="btn primary" type="button">Salvar</button>
+          </div>
+        </section>
+
+        <section class="menu-block">
+          <span class="label">Filas salvas</span>
+          <p id="saved-empty" class="muted">Nenhuma fila salva.</p>
+          <ul id="saved-list" aria-label="Filas salvas"></ul>
+        </section>
+      </div>
+    </div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
