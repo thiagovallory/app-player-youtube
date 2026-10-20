@@ -1,21 +1,8 @@
 import { webFrameMain, type WebContents } from 'electron'
+import { EMBED_HIDE_SELECTORS } from './embedSelectors'
 import { isYoutubeEmbedUrl } from './embedUrl'
 
-// FRAGILE: these are YouTube-internal class names and may change at any time.
-// The player window also sets `pointer-events: none` on the iframe, so clicks on
-// these elements do nothing even if the selectors stop matching.
-const SELECTORS = [
-  '.ytp-pause-overlay',
-  '.ytp-pause-overlay-container',
-  '.ytp-endscreen-content',
-  '.ytp-ce-element',
-  '.ytp-cards-teaser',
-  '.ytp-youtube-button',
-  '.ytp-watermark',
-  '.ytp-gradient-top',
-  '.ytp-chrome-top',
-  '.ytp-show-cards-title',
-].join(', ')
+const SELECTORS = EMBED_HIDE_SELECTORS.join(', ')
 
 const INJECT = `(() => {
   if (document.getElementById('pyt-hide')) return
