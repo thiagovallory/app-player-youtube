@@ -36,12 +36,13 @@ npm test           # testes unitários
 1. Cole o link de um vídeo ou playlist e clique em **Adicionar à fila** (ou Enter). Adicionar não toca sozinho: se a fila estava vazia, o primeiro item fica apenas selecionado. Para tocar, use **Tocar agora** (substitui a fila inteira pelo link e toca), o botão ▶ ou clique no título de um item da fila. Se o vídeo já estiver na fila, o app pede confirmação antes de adicionar de novo.
 2. Playlists entram com todos os vídeos (até 200); os títulos aparecem aos poucos.
 3. Na fila: arraste para reordenar, ✕ remove, clique no título para tocar aquele item, **Limpar** esvazia.
-4. O menu **☰** (canto superior esquerdo) reúne quatro blocos:
+4. O menu **☰** (canto superior esquerdo) abre em tela cheia sobre a janela de controle; feche com o botão **✕**, com Esc ou ao escolher Adicionar/Substituir numa fila salva. Ele reúne quatro blocos:
    - **Monitor**: escolha o monitor de reprodução (**Identificar** mostra o número em cada tela).
    - **Salvar fila**: guarda a fila atual com um nome.
    - **Filas salvas**: **Adicionar** acrescenta os itens ao fim da fila atual (sem tocar), **Substituir** troca a fila atual, seleciona o primeiro item e para o player (sem tocar) e **Excluir** apaga a fila salva. A fila ativa não é restaurada ao abrir o app.
-   - **Reprodução e aparência**: **Mostrar legendas** (desligado por padrão), **Idioma das legendas** (Automático ou um idioma da lista; os idiomas do vídeo atual aparecem na lista), **Velocidade** (0,25× a 2×) e **Tema** (Automático segue o claro/escuro do computador, ou escolha Claro/Escuro). As escolhas ficam salvas para as próximas vezes.
+   - **Reprodução e aparência**: **Mostrar legendas** (desligado por padrão), **Idioma das legendas** (Automático usa o idioma do sistema, ou escolha um idioma da lista; os idiomas do vídeo atual aparecem na lista). As legendas automáticas do YouTube também funcionam: o idioma escolhido é pedido mesmo quando o vídeo não lista faixas, **Velocidade** (0,25× a 2×) e **Tema** (Automático segue o claro/escuro do computador, ou escolha Claro/Escuro). As escolhas ficam salvas para as próximas vezes.
 5. Use play/pause, anterior/próximo, seek e volume. **Parar** fecha o player e mantém a fila. O botão "Mais vídeos" e a logo do YouTube que aparecem sobre o vídeo são ocultados, e a janela do player não responde a cliques.
+6. **Modo compacto**: o botão no canto do cartão "tocando agora" reduz a janela de controle a só esse cartão (título, status, posição e a linha de controles: parar, anterior, play/pause, próximo e volume). Clique de novo (**Expandir**) para voltar ao tamanho normal. O app sempre abre no modo normal.
 
 ## Gerar executáveis
 

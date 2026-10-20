@@ -1,5 +1,5 @@
 import { describeYtError } from '../../shared/playerErrors'
-import { mapTracks, pickTrack } from '../../shared/captions'
+import { chooseCaptionCode, mapTracks } from '../../shared/captions'
 import { DEFAULT_VIDEO_PREFS, IDLE_STATE, type PlayerCommand, type PlayerState, type VideoPrefs } from '../../shared/types'
 
 interface YTPlayer {
@@ -72,8 +72,9 @@ function applyPrefs(): void {
       player.loadModule('captions')
       const tracks = mapTracks(player.getOption('captions', 'tracklist'))
       patch.captionTracks = tracks
-      const code = pickTrack(tracks, prefs.captionLang)
-      if (code) player.setOption('captions', 'track', { languageCode: code })
+      // Always request a language: auto-generated captions are not in the tracklist.
+      const code = chooseCaptionCode(tracks, prefs.captionLang, navigator.language)
+      player.setOption('captions', 'track', { languageCode: code })
     }
   } catch {
     // ignore: the captions module is only partly documented

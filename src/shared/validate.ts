@@ -62,3 +62,18 @@ export function parseVideoPrefsUpdate(v: unknown): Partial<VideoPrefs> | null {
   }
   return Object.keys(out).length > 0 ? out : null
 }
+
+export const COMPACT_MIN_HEIGHT = 120
+export const COMPACT_MAX_HEIGHT = 600
+
+export type CompactRequest = { compact: true; height: number } | { compact: false }
+
+export function parseCompactRequest(v: unknown): CompactRequest | null {
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return null
+  const { compact, height } = v as { compact?: unknown; height?: unknown }
+  if (compact === false) return { compact: false }
+  if (compact !== true) return null
+  if (typeof height !== 'number' || !Number.isInteger(height)) return null
+  if (height < COMPACT_MIN_HEIGHT || height > COMPACT_MAX_HEIGHT) return null
+  return { compact: true, height }
+}

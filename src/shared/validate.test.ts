@@ -12,6 +12,7 @@ import {
   isThemePref,
   parseVideoPrefsUpdate,
   parseQueueName,
+  parseCompactRequest,
 } from './validate'
 
 describe('isVideoId', () => {
@@ -126,5 +127,33 @@ describe('parseVideoPrefsUpdate', () => {
   })
   it('rejects non-objects and objects with no valid field', () => {
     for (const v of [null, undefined, 5, 'x', [], {}, { other: 1 }]) expect(parseVideoPrefsUpdate(v)).toBeNull()
+  })
+})
+
+describe('parseCompactRequest', () => {
+  it('accepts compact with an integer height in range', () => {
+    expect(parseCompactRequest({ compact: true, height: 240 })).toEqual({ compact: true, height: 240 })
+    expect(parseCompactRequest({ compact: true, height: 120 })).toEqual({ compact: true, height: 120 })
+    expect(parseCompactRequest({ compact: true, height: 600 })).toEqual({ compact: true, height: 600 })
+  })
+  it('accepts leaving compact mode, ignoring any height', () => {
+    expect(parseCompactRequest({ compact: false })).toEqual({ compact: false })
+    expect(parseCompactRequest({ compact: false, height: 5 })).toEqual({ compact: false })
+  })
+  it.each([
+    null,
+    undefined,
+    'x',
+    [],
+    {},
+    { compact: 'true', height: 200 },
+    { compact: true },
+    { compact: true, height: 119 },
+    { compact: true, height: 601 },
+    { compact: true, height: 200.5 },
+    { compact: true, height: NaN },
+    { compact: true, height: '200' },
+  ])('rejects %j', (value) => {
+    expect(parseCompactRequest(value)).toBeNull()
   })
 })

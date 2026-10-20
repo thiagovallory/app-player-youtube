@@ -20,6 +20,7 @@ import {
   QUEUE_STATE,
   SETTINGS_GET,
   STATE_TO_CONTROL,
+  WINDOW_COMPACT,
 } from '../shared/ipc'
 
 function subscribe<T>(channel: string, cb: (value: T) => void): Unsubscribe {
@@ -34,6 +35,7 @@ const api: ControlApi = {
   identifyDisplays: () => ipcRenderer.invoke(DISPLAYS_IDENTIFY),
   getSettings: () => ipcRenderer.invoke(SETTINGS_GET),
   sendCommand: (cmd) => ipcRenderer.send(CMD_FROM_CONTROL, cmd),
+  setCompact: (compact, height) => ipcRenderer.send(WINDOW_COMPACT, { compact, height }),
   setPrefs: (update) => ipcRenderer.send(PREFS_SET, update),
   queueGet: () => ipcRenderer.invoke(QUEUE_GET),
   queueAdd: (url, playNow) => ipcRenderer.send(QUEUE_ADD, { url, playNow }),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mapTracks, pickTrack } from './captions'
+import { chooseCaptionCode, mapTracks, pickTrack } from './captions'
 
 describe('mapTracks', () => {
   it('maps tracks using languageName, displayName or the code', () => {
@@ -47,5 +47,42 @@ describe('pickTrack', () => {
     expect(pickTrack(tracks, null)).toBeNull()
     expect(pickTrack(tracks, '')).toBeNull()
     expect(pickTrack([], 'en')).toBeNull()
+  })
+})
+
+describe('chooseCaptionCode', () => {
+  const tracks = [
+    { code: 'en-US', name: 'Inglês' },
+    { code: 'pt', name: 'Português' },
+  ]
+  it('uses the exact or prefix match for an explicit language', () => {
+    expect(chooseCaptionCode(tracks, 'pt', 'en')).toBe('pt')
+    expect(chooseCaptionCode(tracks, 'pt-BR', 'en')).toBe('pt')
+    expect(chooseCaptionCode(tracks, 'en', 'pt-BR')).toBe('en-US')
+  })
+  it('uses the explicit language verbatim when a non-empty list has no match', () => {
+    expect(chooseCaptionCode(tracks, 'ja', 'pt-BR')).toBe('ja')
+    expect(chooseCaptionCode(tracks, 'zh-Hans', 'en')).toBe('zh-Hans')
+  })
+  it('uses the base language of an explicit language when the list is empty (ASR)', () => {
+    expect(chooseCaptionCode([], 'pt-BR', 'en')).toBe('pt')
+    expect(chooseCaptionCode([], 'en', 'pt-BR')).toBe('en')
+    expect(chooseCaptionCode([], 'en_US', 'pt')).toBe('en')
+    expect(chooseCaptionCode([], 'zh-Hans', 'pt')).toBe('zh')
+  })
+  it('automatic: matches the UI language, else the first track', () => {
+    expect(chooseCaptionCode(tracks, null, 'pt-BR')).toBe('pt')
+    expect(chooseCaptionCode(tracks, null, 'de-DE')).toBe('en-US')
+  })
+  it('automatic with an empty list: base language of the UI', () => {
+    expect(chooseCaptionCode([], null, 'pt-BR')).toBe('pt')
+    expect(chooseCaptionCode([], null, 'EN_us')).toBe('en')
+    expect(chooseCaptionCode([], null, 'fr')).toBe('fr')
+  })
+  it('falls back to en for garbage or missing UI language', () => {
+    expect(chooseCaptionCode([], null, '')).toBe('en')
+    expect(chooseCaptionCode([], null, '-BR')).toBe('en')
+    expect(chooseCaptionCode([], null, undefined as unknown as string)).toBe('en')
+    expect(chooseCaptionCode([], '', 'pt-BR')).toBe('pt')
   })
 })

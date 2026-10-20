@@ -22,9 +22,10 @@ import {
   SETTINGS_GET,
   STATE_FROM_PLAYER,
   STATE_TO_CONTROL,
+  WINDOW_COMPACT,
 } from '../shared/ipc'
 import { IDLE_STATE, type DisplaysSnapshot, type PlayerCommand, type PlayerState } from '../shared/types'
-import { isLoadMode, isMoveIndex, isThemePref, isUid, isUrlText, parseQueueName, parseVideoPrefsUpdate } from '../shared/validate'
+import { isLoadMode, isMoveIndex, isThemePref, isUid, isUrlText, parseCompactRequest, parseQueueName, parseVideoPrefsUpdate } from '../shared/validate'
 import { findSaved, pickDisplay, shouldWindow, toDisplayInfos, toSavedDisplay } from './displays'
 import { createFetch } from './electronFetch'
 import { fetchTitles } from './oembed'
@@ -33,6 +34,7 @@ import { expandPlaylist } from './playlistExpander'
 import { QueueManager } from './queueManager'
 import { SettingsStore } from './settingsStore'
 import { startStaticServer } from './staticServer'
+import { createCompactController } from './compactMode'
 import { createControlWindow, identifyDisplays } from './windows'
 
 async function main(): Promise<void> {
@@ -182,6 +184,12 @@ async function main(): Promise<void> {
     }
     controller.send(cmd, target())
   })
+  const compactMode = createCompactController(() => controlWin)
+  ipcMain.on(WINDOW_COMPACT, (event, payload: unknown) => {
+    if (!isControl(event.sender)) return
+    const request = parseCompactRequest(payload)
+    if (request) compactMode.apply(request)
+  })
   ipcMain.on(PREFS_SET, (event, payload: unknown) => {
     if (!isControl(event.sender)) return
     const { videoPrefs, theme } = (typeof payload === 'object' && payload !== null ? payload : {}) as {
@@ -221,6 +229,7 @@ async function main(): Promise<void> {
 
   controlWin = createControlWindow(baseUrl)
   controlWin.on('closed', () => {
+    compactMode.reset()
     controlWin = null
     app.quit()
   })
