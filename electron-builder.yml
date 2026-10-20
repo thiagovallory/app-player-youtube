@@ -20,7 +20,7 @@ mac:
       arch:
         - arm64
         - x64
-  artifactName: Player-YouTube-mac-${arch}.${ext}
+  artifactName: Player-YouTube-${version}-mac-${arch}.${ext}
 win:
   icon: build/icon.ico
   electronLanguages:
@@ -43,6 +43,6 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Player YouTube
-  artifactName: Player-YouTube-win-${arch}-setup.${ext}
+  artifactName: Player-YouTube-${version}-win-${arch}-setup.${ext}
 portable:
-  artifactName: Player-YouTube-win-${arch}-portable.${ext}
+  artifactName: Player-YouTube-${version}-win-${arch}-portable.${ext}

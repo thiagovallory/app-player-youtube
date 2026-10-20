@@ -17,4 +17,4 @@ win:
 nsis:
   buildUniversalInstaller: false
   shortcutName: Player YouTube
-  artifactName: Player-YouTube-win7-${arch}-setup.${ext}
+  artifactName: Player-YouTube-${version}-win7-${arch}-setup.${ext}

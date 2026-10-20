@@ -4,13 +4,13 @@
 
 | Sistema | Arquivo | Como usar |
 |---|---|---|
-| macOS (Apple Silicon) | `Player-YouTube-mac-arm64.zip` | Descompacte e execute |
-| macOS (Intel) | `Player-YouTube-mac-x64.zip` | Descompacte e execute |
-| Windows 10/11 (64 bits) | `Player-YouTube-win-x64-setup.exe` | Instalador (por usuário, sem administrador) |
-| Windows 10/11 (64 bits) | `Player-YouTube-win-x64-portable.exe` | Sem instalar (abre mais devagar) |
-| Windows 10/11 (ARM) | `Player-YouTube-win-arm64-setup.exe` | Instalador |
-| Windows 7 / 8 / 8.1 (64 bits) | `Player-YouTube-win7-x64-setup.exe` | Versão "legado" (Electron 22) |
-| Windows 7 / 8 / 8.1 (32 bits) | `Player-YouTube-win7-ia32-setup.exe` | Versão "legado" (Electron 22) |
+| macOS (Apple Silicon) | `Player-YouTube-{{version}}-mac-arm64.zip` | Descompacte e execute |
+| macOS (Intel) | `Player-YouTube-{{version}}-mac-x64.zip` | Descompacte e execute |
+| Windows 10/11 (64 bits) | `Player-YouTube-{{version}}-win-x64-setup.exe` | Instalador (por usuário, sem administrador) |
+| Windows 10/11 (64 bits) | `Player-YouTube-{{version}}-win-x64-portable.exe` | Sem instalar (abre mais devagar) |
+| Windows 10/11 (ARM) | `Player-YouTube-{{version}}-win-arm64-setup.exe` | Instalador |
+| Windows 7 / 8 / 8.1 (64 bits) | `Player-YouTube-{{version}}-win7-x64-setup.exe` | Versão "legado" (Electron 22) |
+| Windows 7 / 8 / 8.1 (32 bits) | `Player-YouTube-{{version}}-win7-ia32-setup.exe` | Versão "legado" (Electron 22) |
 
 As versões **"legado"** (`win7`) servem para Windows 7, 8, 8.1 e Windows de 32 bits. Use os instaladores normais no Windows 10/11 de 64 bits. O Electron 22 não recebe mais correções de segurança e o Chromium dele é antigo (o YouTube pode deixar de funcionar nele). No Windows 7 instale antes as atualizações do sistema (SP1 e as de segurança).
 

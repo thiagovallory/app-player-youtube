@@ -82,11 +82,42 @@ jobs:
         run: |
           mapfile -t files < <(find artifacts -type f \( -name '*.zip' -o -name '*.exe' \) | sort)
           printf 'Arquivos:\n%s\n' "${files[@]}"
+          sed "s/{{version}}/${TAG#v}/g" .github/release-notes.md > release-notes.generated.md
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${files[@]}" --clobber
           else
             gh release create "$TAG" "${files[@]}" \
               --target "$GITHUB_SHA" \
               --title "Player YouTube ${TAG#v}" \
-              --notes-file .github/release-notes.md
+              --notes-file release-notes.generated.md
           fi
+
+  # Reescreve os links da tabela de downloads do README com a versão publicada.
+  update-readme:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Update README download links
+        run: node scripts/update-readme-downloads.mjs "${TAG#v}" "$GITHUB_REPOSITORY"
+      - name: Commit and push
+        run: |
+          if git diff --quiet README.md; then
+            echo "README já estava atualizado"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: update download links to ${TAG}"
+          git pull --rebase origin main
+          git push origin HEAD:main
