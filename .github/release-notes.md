@@ -16,7 +16,7 @@ As versões **"legado"** (`win7`) servem para Windows 7, 8, 8.1 e Windows de 32 
 
 ## Primeira abertura (apps sem assinatura paga)
 
-- **macOS:** clique com o botão direito no app > Abrir > Abrir. Se aparecer "danificado": `xattr -dr com.apple.quarantine "Player YouTube.app"`.
+- **macOS:** rode `xattr -dr com.apple.quarantine "/caminho/para/Player YouTube.app"` (depois de descompactar) ou, no macOS 15 ou mais novo, tente abrir o app e vá em Ajustes do Sistema > Privacidade e Segurança > **Abrir Mesmo Assim**. No macOS 14 ou mais antigo, botão direito > Abrir > Abrir.
 - **Windows:** o SmartScreen mostra "O Windows protegeu seu PC": clique em "Mais informações" > "Executar assim mesmo".
 
 Licença: [PolyForm Noncommercial 1.0.0](https://github.com/thiagovallory/app-player-youtube/blob/main/LICENSE) (uso não comercial, sem venda).

@@ -52,7 +52,10 @@ npm run dist:win   # Windows 10/11: instaladores x64 e arm64 + .exe portátil x6
 npm run dist:win-legacy   # Windows 7/8/8.1 (e 10/11 de 32 bits): instaladores x64 e 32 bits (Electron 22)
 ```
 
-- **macOS:** descompacte o `.zip` e execute o app, sem instalar. Ele não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia: clique com o botão direito no app > Abrir > Abrir, ou libere em Ajustes do Sistema > Privacidade e Segurança. Se aparecer "danificado", rode `xattr -dr com.apple.quarantine "Player YouTube.app"`.
+- **macOS:** descompacte o `.zip` e execute o app, sem instalar. Ele não é assinado com certificado de desenvolvedor (só assinatura ad-hoc), então na primeira vez o macOS bloqueia. Para liberar (escolha um):
+  - **Terminal (mais simples):** `xattr -dr com.apple.quarantine "/caminho/para/Player YouTube.app"` (arraste o app para a janela do Terminal para preencher o caminho). Rode o comando **depois** de descompactar e **no app que você vai abrir**; se descompactar de novo, a marca volta. Se der "Operation not permitted", dê permissão ao Terminal em Ajustes do Sistema > Privacidade e Segurança > Gerenciamento de Apps (ou Acesso Total ao Disco).
+  - **Ajustes do Sistema (macOS 15 Sequoia ou mais novo):** tente abrir o app, clique em "Concluído"/"OK", vá em Ajustes do Sistema > Privacidade e Segurança, role até "Segurança" e clique em **Abrir Mesmo Assim**.
+  - **macOS 14 ou mais antigo:** botão direito no app > Abrir > Abrir.
 - **Windows (Windows 10 ou 11):**
   - `...-win-x64-setup.exe`: instalador para PCs comuns (64 bits). Instala só para o usuário, sem pedir administrador, e cria atalhos e desinstalador.
   - `...-win-arm64-setup.exe`: instalador para Windows no ARM.
