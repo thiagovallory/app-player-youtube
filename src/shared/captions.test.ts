@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chooseCaptionCode, mapTracks, pickTrack } from './captions'
+import { buildTrackOption, chooseCaptionCode, mapTracks, pickTrack } from './captions'
 
 describe('mapTracks', () => {
   it('maps tracks using languageName, displayName or the code', () => {
@@ -84,5 +84,21 @@ describe('chooseCaptionCode', () => {
     expect(chooseCaptionCode([], null, '-BR')).toBe('en')
     expect(chooseCaptionCode([], null, undefined as unknown as string)).toBe('en')
     expect(chooseCaptionCode([], '', 'pt-BR')).toBe('pt')
+  })
+})
+
+describe('buildTrackOption', () => {
+  it('has no translation when null, empty or invalid', () => {
+    expect(buildTrackOption('pt', null)).toEqual({ languageCode: 'pt' })
+    expect(buildTrackOption('pt', '')).toEqual({ languageCode: 'pt' })
+    expect(buildTrackOption('pt', 5 as unknown as string)).toEqual({ languageCode: 'pt' })
+  })
+  it('has no translation when the base language is the same', () => {
+    expect(buildTrackOption('pt-BR', 'pt')).toEqual({ languageCode: 'pt-BR' })
+    expect(buildTrackOption('pt', 'PT_br')).toEqual({ languageCode: 'pt' })
+  })
+  it('translates otherwise', () => {
+    expect(buildTrackOption('pt', 'en')).toEqual({ languageCode: 'pt', translationLanguage: { languageCode: 'en' } })
+    expect(buildTrackOption('pt-BR', 'zh-Hans')).toEqual({ languageCode: 'pt-BR', translationLanguage: { languageCode: 'zh-Hans' } })
   })
 })

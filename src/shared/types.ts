@@ -18,10 +18,11 @@ export type ThemePref = 'system' | 'light' | 'dark'
 export interface VideoPrefs {
   captions: boolean
   captionLang: string | null
+  captionTranslate: string | null
   playbackRate: number
 }
 
-export const DEFAULT_VIDEO_PREFS: VideoPrefs = { captions: false, captionLang: null, playbackRate: 1 }
+export const DEFAULT_VIDEO_PREFS: VideoPrefs = { captions: false, captionLang: null, captionTranslate: null, playbackRate: 1 }
 
 export interface CaptionTrack {
   code: string
@@ -39,6 +40,7 @@ export interface PlayerState {
   skip?: boolean
   uid?: string
   captionTracks?: CaptionTrack[]
+  translationLanguages?: CaptionTrack[]
   rates?: number[]
 }
 

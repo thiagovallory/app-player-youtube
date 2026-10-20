@@ -208,5 +208,6 @@ input[type='range']:focus-visible { outline: 2px solid var(--accent-hover); outl
 .check { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; cursor: pointer; }
 .check input { width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--accent); }
 .field { display: grid; gap: var(--space-1); }
+.hint { font-size: var(--fs-sm); line-height: 1.4; }
 .field .label { text-transform: none; letter-spacing: 0; font-size: var(--fs); font-weight: 500; }
 select:disabled { opacity: 0.45; cursor: default; }

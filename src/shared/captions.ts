@@ -51,3 +51,14 @@ export function chooseCaptionCode(tracks: CaptionTrack[], lang: string | null, u
   if (tracks.length > 0) return tracks[0].code
   return baseLang(ui) || 'en'
 }
+
+// Option for player.setOption('captions', 'track', ...). The source languageCode is required for
+// translation to take effect; translating into the same base language is a no-op, so it is skipped.
+export function buildTrackOption(
+  code: string,
+  translate: string | null,
+): { languageCode: string; translationLanguage?: { languageCode: string } } {
+  const target = typeof translate === 'string' ? translate.trim() : ''
+  if (!target || baseLang(target) === baseLang(code)) return { languageCode: code }
+  return { languageCode: code, translationLanguage: { languageCode: target } }
+}

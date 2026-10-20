@@ -56,6 +56,10 @@ export function parseVideoPrefsUpdate(v: unknown): Partial<VideoPrefs> | null {
     if (raw.captionLang !== null && !isCaptionLang(raw.captionLang)) return null
     out.captionLang = raw.captionLang
   }
+  if ('captionTranslate' in raw) {
+    if (raw.captionTranslate !== null && !isCaptionLang(raw.captionTranslate)) return null
+    out.captionTranslate = raw.captionTranslate
+  }
   if ('playbackRate' in raw) {
     if (!isPlaybackRate(raw.playbackRate)) return null
     out.playbackRate = raw.playbackRate

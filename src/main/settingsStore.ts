@@ -52,6 +52,7 @@ function readVideoPrefs(v: unknown): VideoPrefs {
   return {
     captions: raw.captions === true,
     captionLang: isCaptionLang(raw.captionLang) ? raw.captionLang : null,
+    captionTranslate: isCaptionLang(raw.captionTranslate) ? raw.captionTranslate : null,
     playbackRate: isPlaybackRate(raw.playbackRate) ? raw.playbackRate : 1,
   }
 }

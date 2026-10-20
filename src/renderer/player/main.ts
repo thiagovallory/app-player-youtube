@@ -1,5 +1,5 @@
 import { describeYtError } from '../../shared/playerErrors'
-import { chooseCaptionCode, mapTracks } from '../../shared/captions'
+import { buildTrackOption, chooseCaptionCode, mapTracks } from '../../shared/captions'
 import { DEFAULT_VIDEO_PREFS, IDLE_STATE, type PlayerCommand, type PlayerState, type VideoPrefs } from '../../shared/types'
 
 interface YTPlayer {
@@ -74,7 +74,8 @@ function applyPrefs(): void {
       patch.captionTracks = tracks
       // Always request a language: auto-generated captions are not in the tracklist.
       const code = chooseCaptionCode(tracks, prefs.captionLang, navigator.language)
-      player.setOption('captions', 'track', { languageCode: code })
+      player.setOption('captions', 'track', buildTrackOption(code, prefs.captionTranslate))
+      patch.translationLanguages = mapTracks(player.getOption('captions', 'translationLanguages'))
     }
   } catch {
     // ignore: the captions module is only partly documented
@@ -84,7 +85,7 @@ function applyPrefs(): void {
   } catch {
     // ignore
   }
-  const extras = JSON.stringify([patch.captionTracks, patch.rates])
+  const extras = JSON.stringify([patch.captionTracks, patch.rates, patch.translationLanguages])
   if (extras !== lastExtras) {
     lastExtras = extras
     report(patch)
@@ -152,6 +153,7 @@ function exec(cmd: PlayerCommand): void {
         skip: undefined,
         uid: cmd.uid,
         captionTracks: undefined,
+        translationLanguages: undefined,
         rates: undefined,
       })
       cancelPrefTimers()

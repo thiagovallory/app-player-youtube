@@ -157,3 +157,16 @@ describe('parseCompactRequest', () => {
     expect(parseCompactRequest(value)).toBeNull()
   })
 })
+
+describe('parseVideoPrefsUpdate captionTranslate', () => {
+  it('accepts a language code or null', () => {
+    expect(parseVideoPrefsUpdate({ captionTranslate: 'en' })).toEqual({ captionTranslate: 'en' })
+    expect(parseVideoPrefsUpdate({ captionTranslate: 'zh-Hans' })).toEqual({ captionTranslate: 'zh-Hans' })
+    expect(parseVideoPrefsUpdate({ captionTranslate: null })).toEqual({ captionTranslate: null })
+  })
+  it('rejects invalid values (all-or-nothing)', () => {
+    expect(parseVideoPrefsUpdate({ captionTranslate: '' })).toBeNull()
+    expect(parseVideoPrefsUpdate({ captionTranslate: 5 })).toBeNull()
+    expect(parseVideoPrefsUpdate({ captions: true, captionTranslate: '!!' })).toBeNull()
+  })
+})
