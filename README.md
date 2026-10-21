@@ -13,13 +13,15 @@ Clique no arquivo do seu sistema (versão mais recente; o número da versão vai
 <!-- downloads:start -->
 | Sistema | Como usar | Download |
 |---|---|---|
-| macOS (Apple Silicon: M1, M2, M3…) | Executar (descompacte o `.zip`) | [Player-YouTube-mac-arm64.zip](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-mac-arm64.zip) |
-| macOS (Intel) | Executar (descompacte o `.zip`) | [Player-YouTube-mac-x64.zip](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-mac-x64.zip) |
-| Windows 10/11 (64 bits) | Instalar | [Player-YouTube-win-x64-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-win-x64-setup.exe) |
-| Windows 10/11 (64 bits) | Executar, sem instalar | [Player-YouTube-win-x64-portable.exe](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-win-x64-portable.exe) |
-| Windows 10/11 (ARM) | Instalar | [Player-YouTube-win-arm64-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-win-arm64-setup.exe) |
-| Windows 7 / 8 / 8.1 (64 bits) | Instalar (versão "legado") | [Player-YouTube-win7-x64-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-win7-x64-setup.exe) |
-| Windows 7 / 8 / 8.1 (32 bits) | Instalar (versão "legado") | [Player-YouTube-win7-ia32-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/latest/download/Player-YouTube-win7-ia32-setup.exe) |
+| macOS (Apple Silicon: M1, M2, M3…) | Instalar (abra o `.dmg` e arraste para Aplicativos) | [Player-YouTube-0.1.5-mac-arm64.dmg](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-mac-arm64.dmg) |
+| macOS (Intel) | Instalar (abra o `.dmg` e arraste para Aplicativos) | [Player-YouTube-0.1.5-mac-x64.dmg](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-mac-x64.dmg) |
+| macOS (Apple Silicon: M1, M2, M3…) | Executar (descompacte o `.zip`) | [Player-YouTube-0.1.5-mac-arm64.zip](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-mac-arm64.zip) |
+| macOS (Intel) | Executar (descompacte o `.zip`) | [Player-YouTube-0.1.5-mac-x64.zip](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-mac-x64.zip) |
+| Windows 10/11 (64 bits) | Instalar | [Player-YouTube-0.1.5-win-x64-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-win-x64-setup.exe) |
+| Windows 10/11 (64 bits) | Executar, sem instalar | [Player-YouTube-0.1.5-win-x64-portable.exe](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-win-x64-portable.exe) |
+| Windows 10/11 (ARM) | Instalar | [Player-YouTube-0.1.5-win-arm64-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-win-arm64-setup.exe) |
+| Windows 7 / 8 / 8.1 (64 bits) | Instalar (versão "legado") | [Player-YouTube-0.1.5-win7-x64-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-win7-x64-setup.exe) |
+| Windows 7 / 8 / 8.1 (32 bits) | Instalar (versão "legado") | [Player-YouTube-0.1.5-win7-ia32-setup.exe](https://github.com/thiagovallory/app-player-youtube/releases/download/v0.1.5/Player-YouTube-0.1.5-win7-ia32-setup.exe) |
 <!-- downloads:end -->
 
 Os apps não têm assinatura paga, então na primeira abertura o macOS e o Windows mostram um aviso de segurança: veja [Gerar executáveis](#gerar-executáveis) para saber como liberar. As versões "legado" usam o Electron 22 (sem correções de segurança): use-as só em Windows que não rodam as versões normais.
